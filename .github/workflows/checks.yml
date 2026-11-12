@@ -42,4 +42,12 @@ jobs:
       - run: pnpm check:start
       - run: pnpm check:liveness
       - run: pnpm check:banner
+
+      - name: start Fenix
+        run: |
+          pnpm dev > dev.log 2>&1 &
+          for i in $(seq 1 90); do curl -sf -o /dev/null http://localhost:3007/profiles && exit 0; sleep 2; done
+          cat dev.log; exit 1
+
       - run: pnpm check:templates
+      - run: pnpm check:isolation
