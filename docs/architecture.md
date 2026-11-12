@@ -27,7 +27,7 @@ Pages are `/p/<person>/…`, API routes `/api/p/<person>/…`. `lib/http.ts` tur
 
 Each person's Home (`/p/<person>/home`, where `/` goes) shows what needs them today (`lib/start/today.ts`), their setup steps until the needed ones are done (`lib/start/progress.ts`), and what Fenix can do with the sentence to tell Claude (`lib/start/prompts.ts`, `features.ts`). The header puts the day-to-day pages first (Home, Pipeline, Interviews, CVs), then the ones about the person (Career record, Stories, Designs, LinkedIn, Banner).
 
-The app has no login, so any website open in the browser could send requests to localhost. `proxy.ts` refuses every API request that changes something (anything but GET, HEAD and OPTIONS) unless `sameOrigin` (`lib/same-origin.ts`) passes: a local Host, and Origin or Sec-Fetch-Site naming Fenix when the browser sends them. Browsers always send one on such requests; the skills' `curl` calls send neither and pass.
+The app has no login. `pnpm dev` listens on 127.0.0.1 only, so other computers can't reach it, and `proxy.ts` answers only requests whose Host is `localhost`, `127.0.0.1` or `[::1]` (`localHost`), which stops a DNS-rebinding page from reading Fenix under its own name. Any website open in the browser can still send requests to localhost, so `proxy.ts` also refuses every API request that changes something (anything but GET, HEAD and OPTIONS) unless `sameOrigin` (`lib/same-origin.ts`) passes: a local Host, and Origin or Sec-Fetch-Site naming Fenix when the browser sends them. Browsers always send one on such requests; the skills' `curl` calls send neither and pass.
 
 ## CV versions
 

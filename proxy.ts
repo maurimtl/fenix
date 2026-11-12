@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { listProfileSlugs, profileExists } from "@/lib/store/profiles";
 import { isSlug } from "@/lib/store/paths";
 import { PROFILE_COOKIE } from "@/lib/profile-url";
-import { sameOrigin } from "@/lib/same-origin";
+import { localHost, sameOrigin } from "@/lib/same-origin";
 
 async function lastUsed(req: NextRequest): Promise<string | null> {
   const c = req.cookies.get(PROFILE_COOKIE)?.value;
@@ -12,9 +12,12 @@ async function lastUsed(req: NextRequest): Promise<string | null> {
 }
 
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
+const OLD_PATHS = /^\/$|^\/(jobs|variants|canonical|cv)(\/|$)/;
 
 export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
+
+  if (!localHost(req)) return new NextResponse("Fenix only answers on localhost", { status: 403 });
 
   // The app has no login, so any website open in the browser could send requests here: every API request that
   // changes something must come from Fenix's own pages (or a local tool, which sends no Origin).
@@ -32,6 +35,8 @@ export async function proxy(req: NextRequest) {
     return res;
   }
 
+  if (!OLD_PATHS.test(pathname)) return NextResponse.next();
+
   const profile = await lastUsed(req);
   const rest = pathname === "/" ? "/home" : pathname;
   const to = profile ? `/p/${profile}${rest}${search}` : "/profiles";
@@ -39,6 +44,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // API writes get the same-origin check; old pre-profile paths redirect; /p/* only refreshes the last-used cookie.
-  matcher: ["/api/:path*", "/", "/p/:path*", "/jobs", "/jobs/:path*", "/variants", "/variants/:path*", "/canonical", "/canonical/:path*", "/cv", "/cv/:path*"],
+  // Every page and API request gets the local-Host check; API writes also the same-origin check; old pre-profile
+  // paths redirect; /p/* refreshes the last-used cookie.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
