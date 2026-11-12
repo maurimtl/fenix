@@ -1,5 +1,7 @@
 # Fenix
 
+[![checks](https://github.com/maurimtl/fenix/actions/workflows/checks.yml/badge.svg)](https://github.com/maurimtl/fenix/actions/workflows/checks.yml)
+
 **A job-hunt workspace that runs on your own computer, with [Claude Code](https://claude.com/claude-code) doing the work.**
 
 You keep one true record of your career. Fenix and Claude turn it into a tailored CV for each job, find postings that fit your pay floor and where you can work, fill in application forms from answers you've already given, brief you before interviews and review them after. Every number on every CV has to come from your record, so nothing you send overstates what you did.
@@ -242,3 +244,7 @@ pnpm check:isolation    # needs pnpm dev running
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+The two debugging skills in `.claude/skills/obra-*` come from [obra/superpowers](https://github.com/obra/superpowers) by Jesse Vincent, MIT; each keeps its licence beside it.
+
+Found a security problem? See [SECURITY.md](SECURITY.md).

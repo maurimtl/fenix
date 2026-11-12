@@ -1,0 +1,45 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    # macOS: the CV designs name macOS fonts, and check:templates measures how they lay out.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: tools
+        run: brew install poppler uv
+
+      - name: get started
+        run: |
+          git config --global user.name "fenix-ci"
+          git config --global user.email "fenix-ci@users.noreply.github.com"
+          pnpm get-started
+
+      - run: pnpm lint
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm check:data
+      - run: pnpm check:claims
+      - run: pnpm check:store
+      - run: pnpm check:resolve
+      - run: pnpm check:tailor
+      - run: pnpm check:jobs
+      - run: pnpm check:start
+      - run: pnpm check:liveness
+      - run: pnpm check:banner
+      - run: pnpm check:templates
