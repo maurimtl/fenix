@@ -31,22 +31,22 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
     "liquidjs": "^10.30.1",
-    "next": "^16.2.10",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
     "yaml": "^2.9.1",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.4.6",
     "playwright": "^1.61.1",
-    "tsx": "^4.23.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   },
   "engines": {
@@ -58,6 +58,9 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
+    }
   }
 }
