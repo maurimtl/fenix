@@ -41,3 +41,7 @@ Supabase's Ashby form allows 3 applications per person in 60 days (seen 2026-11-
 ## Teradata (careers.teradata.com): the résumé parser scrambles the profile
 
 Teradata's careers site makes you create a profile (email plus a privacy box, the person's step), then parses the uploaded CV into Personal, Employment, Education and Skills steps before the questions. On 2026-11-11 the parser put "Fractional" as the employer, marked a past job as current, attached a title to the wrong company, set Quebec addresses to "Badakhshan" and added a duplicate education entry. Check every entry. The month/year date boxes ignore typed text; use the calendar button (year, then month). Removing an entry asks for a Delete confirmation, which is the person's click. Skills is optional.
+
+## Jobgether on LinkedIn hides the hiring company
+
+Jobgether reposts other companies' roles on LinkedIn as "on behalf of a partner company", with the company name removed and Jobgether handling the application. On 2026-11-12 its "Senior Director, Product Growth" (Canada, $250–300K) was Roofr's own posting word for word, and Roofr was already in the pipeline as Applied. Before saving a Jobgether role, search a distinctive phrase or pay band from it to find the real company, then dedupe and apply through that company's board.
