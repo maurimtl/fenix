@@ -47,15 +47,49 @@ code { font-size: 0.92em; background: #e9edf2; padding: 1px 5px; border-radius: 
 .topbar-inner { display: flex; align-items: center; gap: 28px; max-width: 1480px; margin: 0 auto; padding: 0 24px; height: 56px; }
 .wordmark { color: #fff; font-weight: 800; font-size: 19px; letter-spacing: -0.02em; }
 .wordmark:hover { text-decoration: none; }
-.areas { display: flex; align-items: stretch; gap: 4px; height: 100%; flex-wrap: wrap; }
+.areas { display: flex; align-items: stretch; gap: 4px; height: 100%; }
 .area-group { display: flex; gap: 4px; }
+.area-group > a, .profile-switch, .wordmark { white-space: nowrap; }
+.topbar :focus-visible { outline-color: #fff; }
+
+/* Page menus: "Profile" holds the profile pages when they don't fit; "Menu" holds every page on phones. */
+.nav-menu { position: relative; display: flex; align-items: stretch; }
+.menu-profile, .menu-all { display: none; }
+.nav-menu-button { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; background: none; border: 0; border-top: 3px solid transparent; border-bottom: 3px solid transparent; color: #b9c3d6; font: inherit; font-weight: 500; cursor: pointer; }
+.nav-menu-button:hover, .nav-menu-button[aria-expanded="true"] { color: #fff; }
+.menu-profile .nav-menu-button[data-current] { color: #fff; border-bottom-color: #7fb0dc; }
+.nav-menu-button svg { transition: transform 120ms ease; }
+.nav-menu-button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.nav-menu-panel { position: absolute; top: calc(100% + 6px); left: 0; z-index: 50; min-width: 200px; padding: 6px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 10px 30px rgba(29, 43, 69, 0.18); }
+.menu-all .nav-menu-panel { left: auto; right: 0; }
+.nav-menu-panel[hidden] { display: none; }
+.nav-menu-panel ul { list-style: none; margin: 0; padding: 0; }
+.nav-menu-panel ul + ul { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--rule); }
+.nav-menu-panel a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 6px; color: var(--ink); font-weight: 500; white-space: nowrap; }
+.nav-menu-panel a:hover { background: var(--paper); text-decoration: none; }
+.nav-menu-panel a[aria-current="page"] { color: var(--blue); background: #eaf1f8; }
+.topbar .nav-menu-panel :focus-visible { outline-color: var(--blue); outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) { .nav-menu-button svg { transition: none; } }
+
+/* Tablet: the profile pages move into the Profile menu. */
+@media (max-width: 1100px) {
+  .topbar-inner { gap: 16px; padding: 0 16px; }
+  .area-divider, .area-profile { display: none; }
+  .menu-profile { display: flex; }
+  .area-group > a { padding: 0 10px; }
+}
+/* Phone: every page moves into the Menu button. */
+@media (max-width: 640px) {
+  .areas { display: none; }
+  .menu-all { display: flex; align-items: stretch; height: 100%; }
+  .topbar-inner { gap: 12px; }
+  .profile-switch { margin-left: 0; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+}
 .area-divider { width: 1px; margin: 16px 8px; background: rgba(255, 255, 255, 0.25); }
-.areas a { display: flex; align-items: center; padding: 0 12px; color: #b9c3d6; font-weight: 500; border-bottom: 3px solid transparent; border-top: 3px solid transparent; }
-.areas a:hover { color: #fff; text-decoration: none; }
-.areas a[aria-current="page"] { color: #fff; border-bottom-color: #7fb0dc; }
+.area-group > a { display: flex; align-items: center; padding: 0 12px; color: #b9c3d6; font-weight: 500; border-bottom: 3px solid transparent; border-top: 3px solid transparent; }
+.area-group > a:hover { color: #fff; text-decoration: none; }
+.area-group > a[aria-current="page"] { color: #fff; border-bottom-color: #7fb0dc; }
 .topbar-spacer { flex: 1; }
-.topbar-link { color: #b9c3d6; font-size: 14px; }
-.topbar-link:hover { color: #fff; }
 
 /* Page frame */
 .page, .app-shell { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
@@ -286,13 +320,6 @@ code { font-size: 0.92em; background: #e9edf2; padding: 1px 5px; border-radius: 
 .reason { color: var(--fail); font-weight: 500; }
 
 @media (max-width: 860px) {
-  .topbar-inner { gap: 12px; padding: 0 16px; }
-  .areas a { padding: 0 8px; }
-  .topbar-inner { height: auto; flex-wrap: wrap; padding-block: 6px; }
-  .areas { height: auto; }
-  .areas a { padding: 8px; }
-  .area-divider { display: none; }
-  .topbar-link { display: none; }
   .page, .app-shell { padding: 24px 16px 48px; }
   .page-head h1, .dossier-head h1 { font-size: 26px; }
   .dossier { grid-template-columns: 1fr; gap: 24px; }

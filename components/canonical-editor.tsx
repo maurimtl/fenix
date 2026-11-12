@@ -117,12 +117,11 @@ export function CanonicalEditor({
 
   return (
     <>
-    <AppHeader>
-      <Link href={pagePath(slug, "/cv/base")} className="topbar-link">Preview base résumé</Link>
-    </AppHeader>
+    <AppHeader />
     <main className="page">
       <div className="page-head">
         <h1>Career record</h1>
+        <Link href={pagePath(slug, "/cv/base")}>Preview base résumé</Link>
         {savedMsg && (
           <span
             style={{
