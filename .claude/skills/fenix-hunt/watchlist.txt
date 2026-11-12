@@ -1,0 +1,67 @@
+# Company job boards checked every hunt: slug:board (ashby|greenhouse|lever). Verified 2026-11-07.
+# Add a company: find its careers page's board slug, add a line. Remove ones that never fit.
+# AI and analytics products
+hightouch-inc:ashby
+amplitude:ashby
+mixpanel:greenhouse
+posthog:ashby
+fullstory:ashby
+contentsquare:lever
+launchdarkly:greenhouse
+pendo:greenhouse
+cohere:ashby
+writer:ashby
+gamma:ashby
+lovable:ashby
+replit:ashby
+# MarTech and customer engagement
+klaviyo:greenhouse
+braze:greenhouse
+iterable:ashby
+customerio:greenhouse
+attentive:greenhouse
+intercom:greenhouse
+hootsuite:greenhouse
+# PLG / collaboration SaaS
+notion:ashby
+miro:ashby
+zapier:ashby
+webflow:ashby
+dropbox:greenhouse
+duolingo:greenhouse
+1password:ashby
+# Canadian offices or Canada-friendly
+wealthsimple:ashby
+jobber:ashby
+elastic:greenhouse
+okta:greenhouse
+censys:greenhouse
+faire:greenhouse
+spellbook.com:ashby
+# Fintech with growth teams
+ramp:ashby
+mercury:greenhouse
+affirm:greenhouse
+# Remote-first or Canada offices, big-tech pay (added 2026-11-07)
+stripe:greenhouse
+gitlab:greenhouse
+grafanalabs:greenhouse
+instacart:greenhouse
+twilio:greenhouse
+figma:greenhouse
+linear:ashby
+vercel:greenhouse
+coinbase:greenhouse
+pinterest:greenhouse
+dialpad:greenhouse
+hopper:ashby
+clickhouse:ashby
+supabase:ashby
+samsara:greenhouse
+render:ashby
+tailscale:greenhouse
+# Excluded: lightspeedhq (pays well under the floor; confirmed by a contact there, 2026-11-06)
+anthropic:greenhouse
+openai:ashby
+xai:greenhouse
+cursor:ashby

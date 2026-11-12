@@ -1,0 +1,93 @@
+companies:
+  - id: northwind
+    name: Northwind Software
+    positions:
+      - id: northwind-dir
+        title: Director of Product, Growth
+        location: Toronto
+        startDate: "2022-04-01"
+        endDate: null
+        bullets:
+          - id: nw-trial
+            text: Lifted trial-to-paid conversion from 9% to 13% in a year by rebuilding onboarding around the first report a customer creates.
+            story: trial-to-paid
+          - id: nw-team
+            text: Built Northwind's first growth team (2 PMs, 6 engineers, 1 designer) and its weekly experiment review.
+          - id: nw-pricing
+            text: Redesigned pricing into three plans with usage limits, raising average revenue per account 18%.
+            story: pricing-plans
+      - id: northwind-gpm
+        title: Senior Product Manager
+        location: Toronto
+        startDate: "2019-09-01"
+        endDate: "2022-03-31"
+        bullets:
+          - id: nw-integrations
+            text: Shipped 12 integrations in 18 months, which became the top reason customers gave for upgrading.
+          - id: nw-churn
+            text: Cut first-90-day churn from 7% to 5% with in-product checklists and a health score the success team used daily.
+  - id: fabrikam
+    name: Fabrikam Analytics
+    positions:
+      - id: fabrikam-pm
+        title: Product Manager
+        location: Montreal
+        startDate: "2018-01-01"
+        endDate: "2019-08-31"
+        bullets:
+          - id: fb-dash
+            text: Led the dashboard builder rewrite used by 4,000 customers; support tickets about dashboards fell by half.
+          - id: fb-research
+            text: Ran 60 customer interviews a year and turned them into a shared problem backlog for three teams.
+      - id: fabrikam-apm
+        title: Associate Product Manager
+        location: Montreal
+        startDate: "2016-06-01"
+        endDate: "2017-12-31"
+        bullets:
+          - id: fb-alerts
+            text: Shipped scheduled email reports, which 1,200 accounts turned on in the first quarter.
+          - id: fb-onboard
+            text: Rewrote the setup guide with the support team and cut setup calls from 40 to 25 a month.
+  - id: contoso
+    name: Contoso Retail
+    positions:
+      - id: contoso-analyst
+        title: Business Analyst
+        location: Montreal
+        startDate: "2015-01-01"
+        endDate: "2016-05-31"
+        bullets:
+          - id: ct-forecast
+            text: Built the weekly sales forecast the merchandising team planned inventory from.
+          - id: ct-loyalty
+            text: Measured the loyalty program's effect on repeat visits across 30 stores and presented it to the executive team.
+      - id: contoso-junior
+        title: Junior Business Analyst
+        location: Québec City
+        startDate: "2013-05-01"
+        endDate: "2014-12-31"
+        bullets:
+          - id: ct-reports
+            text: Replaced 14 hand-built spreadsheets with one weekly sales report for the regional managers.
+education:
+  - id: mcgill-bcom
+    degree: BCom, Information Systems
+    institution: McGill University
+    location: Montreal
+    startYear: 2009
+    endYear: 2013
+skills:
+  - id: sk-experiments
+    name: Experiment design
+  - id: sk-sql
+    name: SQL
+  - id: sk-pricing
+    name: Pricing & packaging
+  - id: sk-research
+    name: Customer research
+courses:
+  - id: crs-growth
+    name: Growth Series
+    term: Spring 2023
+    provider: Reforge

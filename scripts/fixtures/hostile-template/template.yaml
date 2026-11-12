@@ -1,0 +1,2 @@
+name: Hostile fixture
+description: Tries to run script; check:templates proves it cannot.

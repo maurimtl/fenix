@@ -1,0 +1,21 @@
+@page { size: Letter; margin: 0.4in 0.5in; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #ffffff; }
+body { color: #1c1f24; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 9pt; line-height: 1.32; font-variant-ligatures: none; }
+a { color: inherit; text-decoration: none; }
+.top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16pt; padding-bottom: 6pt; border-bottom: 2px solid #3b4cca; }
+.name { font-size: 17pt; font-weight: 700; margin: 0; }
+.headline { font-size: 9.5pt; color: #3b4cca; margin-top: 1pt; }
+.contact { text-align: right; font-size: 8.3pt; color: #4a505a; }
+.h { font-size: 8.6pt; font-weight: 700; text-transform: uppercase; color: #3b4cca; margin: 8pt 0 3pt; break-after: avoid; }
+.summary { margin: 0; }
+.summary-list { margin: 0; padding-left: 11pt; }
+.job { margin-bottom: 5pt; break-inside: avoid; }
+.job-title { font-weight: 700; }
+.job-company { color: #4a505a; }
+.job-dates { color: #6a707a; font-size: 8.2pt; white-space: nowrap; }
+.job ul { margin: 1.5pt 0 0; padding-left: 11pt; }
+.job li { margin-bottom: 0.5pt; }
+.row { display: flex; justify-content: space-between; gap: 8pt; align-items: baseline; }
+.inline { margin: 0; }
+.sub { color: #6a707a; font-size: 8.2pt; }

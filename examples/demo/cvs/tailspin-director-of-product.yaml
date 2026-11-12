@@ -1,0 +1,13 @@
+id: cvdemotailspin01
+name: Tailspin - Director of Product
+templateId: classic
+overrides:
+  currency: USD
+  positions:
+    northwind-gpm:
+      mode: reflow
+      bullets:
+        nw-integrations:
+          reworded: Shipped 12 integrations in 18 months; they became the top reason customers gave for upgrading.
+createdAt: "2026-10-28T15:00:00.000Z"
+updatedAt: "2026-10-28T15:00:00.000Z"

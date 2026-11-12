@@ -1,0 +1,1 @@
+- [Job search preferences](search-preferences.md) — remote from Canada, B2B SaaS, growth or onboarding scope

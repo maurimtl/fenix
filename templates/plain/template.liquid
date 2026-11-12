@@ -1,0 +1,37 @@
+<h1 class="name">{{ fullName }}</h1>
+<div class="headline">{{ headline }}</div>
+<div class="contact">{% if location %}{{ location }} · {% endif %}{{ email }}{% if phone %} · {{ phone }}{% endif %}{% if linkedin %} · <a href="{{ linkedin }}">{{ linkedinLabel }}</a>{% endif %}</div>
+{%- if summary != "" %}
+<h2>Summary</h2>
+{%- if summaryIsList %}<ul class="summary-list">{% for l in summaryLines %}<li>{{ l }}</li>{% endfor %}</ul>{% else %}<p class="summary">{{ summary }}</p>{% endif %}
+{%- endif %}
+{%- if keyAchievements.size > 0 %}
+<h2>Key achievements</h2>
+<ul class="ka">{% for k in keyAchievements %}<li><b>{{ k.title }}:</b> {{ k.text }}</li>{% endfor %}</ul>
+{%- endif %}
+{%- if positions.size > 0 %}
+<h2>Experience</h2>
+{%- for p in positions %}
+<div class="job">
+<div class="job-title">{{ p.title }}</div>
+<div class="job-meta">{{ p.company }}{% if p.location %} · {{ p.location }}{% endif %} · {{ p.dates }}</div>
+{%- if p.bullets.size > 0 %}<ul>{% for b in p.bullets %}<li>{{ b.text }}</li>{% endfor %}</ul>{% endif %}
+</div>
+{%- endfor %}
+{%- endif %}
+{%- if education.size > 0 %}
+<h2>Education</h2>
+{%- for e in education %}<div class="entry"><strong>{{ e.degree }}</strong>, {{ e.institution }}{% if e.years != "" %} <span class="muted">· {{ e.years }}</span>{% endif %}</div>{% endfor %}
+{%- endif %}
+{%- if skills.size > 0 %}
+<h2>{{ skillsHeading }}</h2>
+<p class="inline">{% for s in skills %}{{ s.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}</p>
+{%- endif %}
+{%- for g in courseGroups %}
+<h2>{{ g.provider }}</h2>
+{%- for c in g.items %}<div class="entry">{{ c.name }}{% if c.term %} <span class="muted">· {{ c.term }}</span>{% endif %}</div>{% endfor %}
+{%- endfor %}
+{%- if languages.size > 0 %}
+<h2>Languages</h2>
+<p class="inline">{{ languagesText }}</p>
+{%- endif %}

@@ -1,0 +1,60 @@
+{
+  "name": "fenix",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3007",
+    "build": "next build",
+    "start": "next start -p 3007",
+    "lint": "eslint .",
+    "check:resolve": "tsx scripts/check-resolve.ts",
+    "check:tailor": "tsx scripts/check-tailor-map.ts",
+    "check:jobs": "tsx scripts/check-jobs.ts",
+    "backup": "bash scripts/backup.sh",
+    "check:store": "tsx scripts/check-store.ts",
+    "check:pdfs": "tsx scripts/snapshot-app.ts capture after --profile ${FENIX_PROFILE:?set FENIX_PROFILE to the person to compare} && tsx scripts/snapshot-app.ts compare before after --only pdfs",
+    "check:data": "tsx scripts/check-data.ts",
+    "data:commit": "tsx scripts/data-commit.ts",
+    "check:templates": "tsx scripts/check-templates.ts",
+    "get-started": "pnpm install && tsx scripts/get-started.ts",
+    "check:claims": "tsx scripts/check-claims.ts",
+    "check:banner": "tsx scripts/check-banner.ts",
+    "check:banner-api": "tsx scripts/check-banner-api.ts",
+    "check:closed": "tsx scripts/check-closed.ts",
+    "check:liveness": "tsx scripts/check-liveness.ts",
+    "fenix": "tsx scripts/fenix.ts",
+    "check:isolation": "tsx scripts/check-isolation.ts",
+    "check:start": "tsx scripts/check-start.ts",
+    "check:public": "tsx scripts/check-public.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "liquidjs": "^10.30.1",
+    "next": "^16.2.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
+    "yaml": "^2.9.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.2.10",
+    "playwright": "^1.61.1",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

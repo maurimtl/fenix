@@ -1,0 +1,5 @@
+<script>document.body.append("SCRIPT-RAN")</script>
+<img src="data:," onerror="document.body.append('SCRIPT-RAN')">
+<svg onload="document.body.append('SCRIPT-RAN')"></svg>
+<h1>{{ fullName }}</h1>
+{% for p in positions %}<h2>{{ p.title }}</h2><ul>{% for b in p.bullets %}<li>{{ b.text }}</li>{% endfor %}</ul>{% endfor %}

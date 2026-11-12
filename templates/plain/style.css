@@ -1,0 +1,22 @@
+@page { size: Letter; margin: 0.6in 0.7in; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #ffffff; }
+body { color: #1d2126; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 10.2pt; line-height: 1.4; font-variant-ligatures: none; }
+a { color: inherit; text-decoration: none; }
+.name { font-size: 20pt; font-weight: 700; margin: 0; }
+.headline { font-size: 11pt; color: #2f3640; margin-top: 2pt; }
+.contact { font-size: 9.4pt; color: #4b525c; margin-top: 4pt; }
+h2 { font-size: 11pt; font-weight: 700; margin: 14pt 0 5pt; padding-bottom: 2pt; border-bottom: 1px solid #c9ced6; break-after: avoid; }
+.summary { margin: 0; }
+.summary-list { margin: 0; padding-left: 14pt; }
+.ka { margin: 0; padding-left: 14pt; }
+.ka li { margin-bottom: 2pt; }
+.ka b { font-weight: 700; }
+.job { margin-bottom: 9pt; }
+.job-title { font-weight: 700; break-after: avoid; }
+.job-meta { color: #4b525c; font-size: 9.6pt; break-after: avoid; }
+.job ul { margin: 3pt 0 0; padding-left: 14pt; }
+.job li { margin-bottom: 2pt; }
+.entry { margin-bottom: 3pt; }
+.muted { color: #4b525c; }
+.inline { margin: 0; }

@@ -1,0 +1,23 @@
+fullName: Alex Morgan
+headline: Director of Product | Growth & Onboarding for B2B SaaS
+email: alex.morgan@example.com
+phone: "416-555-0142"
+location: Toronto, Canada
+summary: Product leader who turns onboarding and pricing into growth. Built Northwind's first growth team and lifted trial-to-paid from 9% to 13% in a year.
+about: null
+linkedin: https://www.linkedin.com/in/example-alex-morgan/
+settings:
+  floorUsd: 160000
+  strongMatchFit: 75
+  homeCountry: CA
+  homeCountryName: Canada
+  remoteRule: Remote and hiring in Canada (or North America, or anywhere), or the employer sponsors visas.
+  exceptions: []
+  targetTitles:
+    - Director / Head of Product
+    - Growth Product Manager
+  queries:
+    - 'Canada, past week: "director of product" OR "head of product" OR "growth product"'
+  watchlistExtra: []
+  cvFileName: "{name} - {company} - {role}"
+  defaultTemplate: sidebar

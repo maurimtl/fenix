@@ -1,0 +1,17 @@
+id: cvdemobrightline01
+name: Brightline - Head of Growth
+templateId: sidebar
+overrides:
+  headline: Head of Growth | Onboarding, Pricing & Experiments
+  summary: Growth product leader for B2B SaaS. Lifted trial-to-paid from 9% to 13% and built Northwind's first growth team.
+  currency: USD
+  positions:
+    northwind-dir:
+      mode: reflow
+      bullets: {}
+    contoso-analyst:
+      mode: reflow
+      hidden: true
+      bullets: {}
+createdAt: "2026-10-20T15:00:00.000Z"
+updatedAt: "2026-10-20T15:00:00.000Z"

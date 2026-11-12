@@ -1,0 +1,2 @@
+Priya: Thanks for joining. Tell me why growth.
+Alex: Growth starts at the first report a trial builds. At Northwind, trials that built one converted three times as often.
