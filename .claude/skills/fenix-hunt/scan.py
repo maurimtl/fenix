@@ -83,7 +83,10 @@ def role_line(r):
 def scan_boards(entries, dream, ctx):
     """entries and dream are 'slug[:board[:extra]]'. Returns (roles, {name: stats})."""
     wide = {e.split(":")[0] for e in dream}
-    todo = list(dict.fromkeys(entries + [d for d in dream if d.split(":")[0] not in {e.split(":")[0] for e in entries}]))
+    todo = {}  # one entry per slug; the first one listed wins
+    for e in entries + dream:
+        todo.setdefault(e.split(":")[0], e)
+    todo = list(todo.values())
 
     def one(entry):
         slug, board, extra = (entry.split(":", 2) + ["", ""])[:3]
@@ -109,13 +112,16 @@ def scan_feeds(ctx):
             host, _, name = rest.partition(":")
             getro.append((host, name or host))
             continue
-        try:
-            res = hunt_feeds.FEEDS[kind](rest, ctx)
-        except KeyError:
+        if kind not in hunt_feeds.FEEDS:
             stats[kind] = dict(status="failed", reason="unknown feed")
             continue
-        except (FetchError, ValueError, KeyError, TypeError) as e:
-            stats[kind] = dict(status="failed", reason=str(e) or type(e).__name__)
+        try:
+            res = hunt_feeds.FEEDS[kind](rest, ctx)
+        except FetchError as e:
+            stats[kind] = dict(status="failed", reason=str(e))
+            continue
+        except (ValueError, KeyError, TypeError, AttributeError) as e:
+            stats[kind] = dict(status="failed", reason=f"unexpected answer ({type(e).__name__}: {e})")
             continue
         roles += [r for r in res["roles"] if keep_title(r["title"])]
         stats[kind] = dict(res, status="ok", kept=0, roles=None)
@@ -167,8 +173,13 @@ def main(argv=None):
     if opts["mark"] is not None:
         if not opts["profile"] or not opts["mark"]:
             sys.exit("--mark-seen needs --profile <person> and at least one key")
-        done = fetch_json(f"{APP}/api/p/{opts['profile']}/hunt", {"seen": opts["mark"]})
-        print(f"marked {done.get('added', 0)} new, {len(opts['mark']) - done.get('added', 0)} already seen")
+        keys, added = list(dict.fromkeys(opts["mark"])), 0
+        for i in range(0, len(keys), 1000):  # the route takes at most 2,000 keys a call
+            try:
+                added += fetch_json(f"{APP}/api/p/{opts['profile']}/hunt", {"seen": keys[i:i + 1000]}).get("added", 0)
+            except FetchError as e:
+                sys.exit(f"marked {added} new, then the app refused the next batch ({e}); keys are at most 300 characters")
+        print(f"marked {added} new, {len(keys) - added} already seen")
         return
 
     # Without the person's own pattern, the country name alone still catches "Remote, Canada".

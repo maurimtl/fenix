@@ -6,6 +6,9 @@ SENIOR = re.compile(r"\b(director|head|s?vp|evp|vice president|chief|cpo|gm|gene
                     r"|\b(product|growth)\b.*\b(director|head|s?vp|evp|vice president|lead)\b", re.I)
 WIDE = re.compile(r"\b(product|growth)\b", re.I)
 SKIP = re.compile(r"design|marketing|engineer|sales|account|counsel|legal|finance", re.I)
+# "product" and "growth" in a dream company's title are often not product work: Product Architect, Product Security.
+WIDE_SKIP = re.compile(r"architect|communications|content|partner|security|data scien|reliab|compliance|polic|recruit|support"
+                       r"|analyst|research|software|developer|program manager|counsel|intern\b", re.I)
 REPOST_HOSTS = re.compile(r"(^|\.)(remote\.com|jobgether\.com|theladders\.com)$", re.I)
 
 FEED_QUERIES = ["head of product", "vp product", "director of product", "chief product officer",
@@ -18,7 +21,9 @@ def keep_title(title, wide=False):
     """Senior product, growth or AI titles; with wide (dream companies) any product or growth title."""
     if not title or SKIP.search(title):
         return False
-    return bool((WIDE if wide else SENIOR).search(title))
+    if SENIOR.search(title):
+        return True
+    return bool(wide and WIDE.search(title) and not WIDE_SKIP.search(title))
 
 
 def strip_html(text):
@@ -44,18 +49,25 @@ def iso(value):
 
 def iso_from(text, fmt):
     try:
-        return datetime.strptime(text.strip(), fmt).replace(tzinfo=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        d = datetime.strptime(text.strip(), fmt)
+        d = d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d.astimezone(timezone.utc)
+        return d.strftime("%Y-%m-%dT%H:%M:%S.000Z")
     except (AttributeError, ValueError):
         return None
 
 
 def iso_ago(text, now=None):
     """'16 days', 'about 2 months', 'Posted 8 Days Ago' as an approximate date. None for 'Posted 30+ Days Ago'."""
+    now = now or datetime.now(timezone.utc)
+    word = re.search(r"\b(today|just posted|yesterday)\b", text or "", re.I)
     m = re.search(r"(\d+)(\+)?\s*(minute|hour|day|week|month|year)", text or "", re.I)
+    if word:
+        d = now - timedelta(days=1 if word.group(1).lower() == "yesterday" else 0)
+        return d.strftime("%Y-%m-%dT%H:%M:%S.000Z")
     if not m or m.group(2):
         return None
     days = {"minute": 1 / 1440, "hour": 1 / 24, "day": 1, "week": 7, "month": 30, "year": 365}[m.group(3).lower()]
-    d = (now or datetime.now(timezone.utc)) - timedelta(days=int(m.group(1)) * days)
+    d = now - timedelta(days=int(m.group(1)) * days)
     return d.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
@@ -107,7 +119,7 @@ def merge(roles):
     out, by_key, by_name, merged = [], {}, {}, {}
 
     def absorb(winner, loser):
-        label = (loser["via"] or [loser["source"]])[0]
+        label = loser.get("origin") or (loser["via"] or [loser["source"]])[0]
         merged[label] = merged.get(label, 0) + 1
         for v in loser["via"]:
             if v not in winner["via"]:

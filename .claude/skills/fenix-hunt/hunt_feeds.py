@@ -101,8 +101,8 @@ def getro(boards, ctx, sleep=time.sleep):
                 continue
             try:
                 found, total = parse_getro(next_data(fetch(f"https://{host}/jobs?q={quote(q)}")), name)
-            except FetchError as e:
-                errors[name] = e
+            except (FetchError, ValueError, KeyError, TypeError, AttributeError) as e:
+                errors[name] = e if isinstance(e, FetchError) else FetchError(200, f"unexpected page ({type(e).__name__})")
                 continue
             res = results[name]
             res["capped"] = res["capped"] or total > len(found)
@@ -211,7 +211,8 @@ def wwr(cfg, ctx):
     for r in parse_wwr(fetch("https://weworkremotely.com/categories/remote-product-jobs.rss")):
         res["read"] += 1
         region = r["loc"]
-        if re.search(r"anywhere|north america|americas", region, re.I) or not region or home_ok(ctx, region):
+        # "North America Only" counts only when the person's own pattern names it ($FENIX_HOME_MATCH).
+        if re.search(r"anywhere", region, re.I) or not region or home_ok(ctx, region):
             res["roles"].append(r)
         else:
             res["dropped"] += 1

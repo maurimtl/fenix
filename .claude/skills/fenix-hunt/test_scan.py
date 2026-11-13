@@ -22,7 +22,8 @@ for title, wide, want in [
     ("Vice-président·e Produit | Head Of Product", False, True), ("SVP, Product", False, True),
     ("Product Manager, Claude Code", False, False), ("Product Manager, Claude Code", True, True),
     ("Head of Product Marketing", False, False), ("Head of Product Marketing", True, False),
-    ("Senior Product Designer", True, False), ("Staff Software Engineer, Growth", True, False), ("", True, False),
+    ("Senior Product Designer", True, False), ("Product Content Creator", True, False), ("Senior Product Architect, Storage", True, False),
+    ("Director, Product Security", True, True), ("Product Operations Manager", True, True), ("Growth Lead, Brazil", True, True), ("Staff Software Engineer, Growth", True, False), ("", True, False),
 ]:
     check(f"keep_title {title!r} wide={wide}", hunt_core.keep_title(title, wide), want)
 
@@ -38,6 +39,10 @@ NOW = datetime(2026, 11, 13, 12, tzinfo=timezone.utc)
 check("iso_ago: 16 days", hunt_core.iso_ago("16 days", NOW), "2026-10-28T12:00:00.000Z")
 check("iso_ago: Posted 8 Days Ago", hunt_core.iso_ago("Posted 8 Days Ago", NOW), "2026-11-05T12:00:00.000Z")
 check("iso_ago: 30+ days is unknown", hunt_core.iso_ago("Posted 30+ Days Ago", NOW), None)
+check("iso_ago: today and yesterday", [hunt_core.iso_ago("Posted Today", NOW), hunt_core.iso_ago("Posted Yesterday", NOW)],
+      ["2026-11-13T12:00:00.000Z", "2026-11-12T12:00:00.000Z"])
+check("iso_from: an offset is converted, not dropped", hunt_core.iso_from("Mon, 09 Nov 2026 23:00:00 -0500", "%a, %d %b %Y %H:%M:%S %z"),
+      "2026-11-10T04:00:00.000Z")
 
 # --- posting links ---
 check("posting_ref ashby", hunt_core.posting_ref("https://jobs.ashbyhq.com/n8n/cc5ce6e0-5d50-4cfd-a522-4304dc09d29b?utm=x"),
@@ -106,6 +111,23 @@ res = hunt_ats.scan_company("co", "fake", "", {}, keep)
 check("caps reported and details limited", (res["read"], len(res["roles"]), res["capped"], res["details_capped"], len(calls)),
       (21, 20, True, True, 15))
 check("unknown board type", hunt_ats.scan_company("co", "nope", "", {}, keep)["status"], "failed")
+hunt_ats.BOARDS["fake"] = fake(KeyError("title"))
+res = hunt_ats.scan_company("co", "fake", "", {}, keep)
+check("a board that answers in an unexpected shape is failed, not a crash", (res["status"], res["reason"]),
+      ("failed", "unexpected answer (KeyError: 'title')"))
+for n in hunt_ats.GUESS:
+    hunt_ats.BOARDS[n] = fake(FetchError(429, "Too Many Requests"))
+check("guessing: boards that all answer 429 are failed, not NOT FOUND", hunt_ats.scan_company("co", None, "", {}, keep)["status"], "failed")
+for n in hunt_ats.GUESS:
+    hunt_ats.BOARDS[n] = fake(FetchError(404, "Not Found"))
+check("guessing: boards that all answer 404 are NOT FOUND", hunt_ats.scan_company("co", None, "", {}, keep)["status"], "notfound")
+real_fetch_json = hunt_ats.fetch_json
+page = lambda n: {"total": 45, "jobPostings": [{"title": "Head of Product", "externalPath": f"/job/x_{n}_{i}"} for i in range(19)] + [{"title": "no path"}]}
+asked = []
+hunt_ats.fetch_json = lambda url, body=None, headers=None: (asked.append(body["offset"]), page(body["offset"]))[1]
+got, capped = hunt_ats.workday_pages("https://h", "co", "site", {})
+check("workday: a posting with no path does not end paging early", (asked, len(got), capped), ([0, 20, 40], 57, False))
+hunt_ats.fetch_json = real_fetch_json
 hunt_ats.BOARDS.clear(); hunt_ats.BOARDS.update(real)
 
 # --- feed parsers ---
@@ -132,6 +154,9 @@ check("getro: read once per role, repost dropped, pauses between rounds",
 hunt_feeds.fetch = lambda url: (_ for _ in ()).throw(FetchError(503, "Unavailable"))
 results, errors = hunt_feeds.getro([("board.example", "communitech")], ctx, sleep=slept.append)
 check("getro: a failing board is reported", str(errors["communitech"]), "503 Unavailable")
+hunt_feeds.fetch, hunt_feeds.next_data = (lambda url: "page"), (lambda page: {"props": {"pageProps": {"initialState": {"jobs": {"found": [{}]}}}}})
+results, errors = hunt_feeds.getro([("board.example", "communitech")], ctx, sleep=slept.append)
+check("getro: a malformed page is reported, not a crash", str(errors["communitech"]), "200 unexpected page (KeyError)")
 hunt_feeds.fetch, hunt_feeds.next_data = real_fetch, real_next
 
 w = hunt_feeds.parse_wellfound(load("wellfound_page.json"))
@@ -170,6 +195,9 @@ board = hunt_core.role("greenhouse", "5471107008", "geotab", "Head of Domain, Pr
 board["origin"] = "geotab"  # set by scan_boards: the watchlist slug, whatever the board calls the company
 roles = [board, g[1], g[2], g[0]]
 board["company"] = "Geotab Inc."
+dup = hunt_core.role("greenhouse", "5471107008", "geotab", "Head of Domain, Product & Engineering", "https://x")
+dup["origin"] = "geotab-copy"
+check("merge counts a board duplicate under its own watchlist entry", hunt_core.merge([dict(board), dup])[1], {"geotab-copy": 1})
 stats = {"geotab": dict(status="ok", board="greenhouse", read=40, kept=0), "communitech": dict(status="ok", read=4, kept=0, dropped=1)}
 shown = scan.finish(roles, stats, {"communitech:" + g[0]["sourceJobId"]}, False, ctx)
 check("finish: merged, hidden and kept counts", (len(shown), stats["geotab"]["kept"], stats["communitech"]["kept"],

@@ -187,9 +187,9 @@ def workday_pages(host, slug, site, facets):
         if "jobPostings" not in d:
             raise FetchError(200, "no job list in the answer")
         total = d.get("total") or total
-        got = parse_workday(d, slug, host, site)
-        out += got
-        if len(got) < 20 or len(out) >= total:
+        out += parse_workday(d, slug, host, site)
+        # The raw page size decides whether there is another page; parse_workday may drop postings with no path.
+        if len(d["jobPostings"]) < 20 or (page + 1) * 20 >= total:
             return out, False
     return out, True
 
@@ -251,6 +251,7 @@ GUESS = ("ashby", "greenhouse", "lever")
 def scan_company(slug, board, extra, ctx, keep):
     """Returns dict(board, status ok|failed|notfound, reason, read, roles (kept), capped, details_capped)."""
     res = dict(board=board, status="notfound", reason="", read=0, roles=[], capped=False, details_capped=False)
+    errors = []
     for name in ([board] if board else GUESS):
         if name not in BOARDS:
             res.update(status="failed", reason=f"unknown board type {name}")
@@ -259,9 +260,15 @@ def scan_company(slug, board, extra, ctx, keep):
         try:
             jobs, capped = lister(slug, extra, ctx)
         except FetchError as e:
-            if e.status == 404 or (not board and e.status):
+            if e.status == 404:
+                continue
+            if not board:  # guessing: remember the error and try the next board type
+                errors.append(f"{name} {e}")
                 continue
             res.update(board=name, status="failed", reason=str(e))
+            return res
+        except (KeyError, TypeError, AttributeError, ValueError) as e:
+            res.update(board=name, status="failed", reason=f"unexpected answer ({type(e).__name__}: {e})")
             return res
         if not jobs and not board:
             continue
@@ -271,10 +278,13 @@ def scan_company(slug, board, extra, ctx, keep):
             for j in kept[:MAX_DETAILS]:
                 try:
                     detail(j, slug, extra)
-                except FetchError:
+                except (FetchError, KeyError, TypeError, AttributeError, ValueError):
                     pass
             for j in kept:
                 j.pop("path", None)
         res.update(board=name, status="ok", read=len(jobs), roles=kept, capped=capped)
         return res
+    # A 429 or 5xx while guessing is a board that did not answer, not a company without a board.
+    if errors and any(not e.split()[1].startswith(("400", "403", "410")) for e in errors):
+        res.update(status="failed", reason="; ".join(errors))
     return res
