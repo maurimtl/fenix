@@ -1,0 +1,15 @@
+# Sources that list many companies, read every scan. One per line: a reader name, or getro:<board host>:<name>.
+# Getro boards are read from their public pages (first 20 results per search), never from api.getro.com.
+himalayas
+wellfound
+yc
+wwr
+mindtheproduct
+# Canadian tech
+getro:www1.communitech.ca:communitech
+# Venture-fund portfolios
+getro:jobs.khoslaventures.com:khosla
+getro:jobs.accel.com:accel
+getro:jobs.generalcatalyst.com:generalcatalyst
+getro:careers.georgian.io:georgian
+getro:radical.getro.com:radical

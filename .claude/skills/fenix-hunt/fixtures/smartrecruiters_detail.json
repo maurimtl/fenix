@@ -1,0 +1,74 @@
+{
+ "id": "744000161548289",
+ "name": "AI Security Engineer Intern",
+ "uuid": "80e03fd6-8818-4a08-a108-b1583f265be0",
+ "jobId": "b8b77133-05b1-4f62-b871-e6bb07c4bf38",
+ "jobAdId": "a6b0a25e-da0c-4fb1-a5c2-61bbf0a99707",
+ "defaultJobAd": true,
+ "refNumber": "JB0076579",
+ "company": {
+  "name": "ServiceNow",
+  "identifier": "ServiceNow"
+ },
+ "location": {
+  "city": "San Diego",
+  "region": "California",
+  "country": "us",
+  "address": "4810 Eastgate Mall",
+  "postalCode": "92121",
+  "remote": false,
+  "hybrid": false,
+  "fullLocation": "San Diego, California, United States"
+ },
+ "releasedDate": "2026-11-13T17:50:24.231Z",
+ "postingUrl": "https://jobs.smartrecruiters.com/ServiceNow/744000161548289-ai-security-engineer-intern",
+ "applyUrl": "https://jobs.smartrecruiters.com/ServiceNow/744000161548289-ai-security-engineer-intern?oga=true",
+ "referralUrl": "https://jobs.smartrecruiters.com/external-referrals/company/ServiceNow/publication/80e03fd6-8818-4a08-a108-b1583f265be0?dcr_ci=ServiceNow",
+ "jobAd": {
+  "sections": {
+   "companyDescription": {
+    "title": "Company Description",
+    "text": "<p>It all started when engineer Fred Luddy wrote code that automated a tedious task for his coworker, Phyllis. She cried tears of joy. That moment inspired Fred to build a company that could do that for everyone—freeing "
+   },
+   "jobDescription": {
+    "title": "Job Description",
+    "text": "<p><strong>Who we are:</strong></p><p>Imagine your workday dominated less by emails and spreadsheets, with more time given back to you to do your actual job. At ServiceNow, we are making work life more lifelike and chang"
+   },
+   "qualifications": {
+    "title": "Qualifications",
+    "text": "<p>To be successful in this role you have:</p><ul><li>Currently enrolled in an accredited university, working on a <strong>Masters degree</strong>&#xa0;in Mathematics, Statistics, Computer Science or related field and <s"
+   },
+   "additionalInformation": {
+    "title": "Additional Information",
+    "text": "<p><strong>Work Personas</strong></p><p>We approach our distributed world of work with flexibility and trust. Work personas (flexible, remote, or required in office) are categories that are assigned to ServiceNow employe"
+   }
+  }
+ },
+ "active": true,
+ "visibility": "PUBLIC",
+ "industry": {
+  "id": "it_and_services",
+  "label": "Information Technology And Services"
+ },
+ "function": {
+  "id": "other",
+  "label": "Other"
+ },
+ "department": {
+  "id": 3205510,
+  "label": "Digital Technology"
+ },
+ "experienceLevel": {
+  "id": "not_applicable",
+  "label": "Not Applicable"
+ },
+ "typeOfEmployment": {
+  "id": "intern",
+  "label": "Intern"
+ },
+ "language": {
+  "code": "en",
+  "label": "English",
+  "labelNative": "English (US)"
+ }
+}

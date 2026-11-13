@@ -1,0 +1,149 @@
+{
+ "totalCount": 40,
+ "jobs": [
+  {
+   "title": "Head of Product Marketing & Growth",
+   "excerpt": "About Defuse LabsDefuse Labs builds NEAR Intents, the universal transaction layer for the AI economy — intent-based infrastructure that enables people, agents, and applications to move value across chains and assets with",
+   "companyName": "Defuse Labs",
+   "companySlug": "defuse-labs",
+   "employmentType": "Full Time",
+   "minSalary": null,
+   "maxSalary": null,
+   "salaryPeriod": "annual",
+   "seniority": [
+    "Director"
+   ],
+   "currency": null,
+   "locationRestrictions": [],
+   "timezoneRestrictions": [
+    -11,
+    -10,
+    -9.5
+   ],
+   "categories": [
+    "Product-Marketing-Manager",
+    "Head-of-Product-Marketing",
+    "Growth-Marketing-Manager"
+   ],
+   "parentCategories": [
+    "Marketing",
+    "Product"
+   ],
+   "description": "<h3>About <a href=\"https://himalayas.app/companies/defuse-labs\">Defuse Labs</a>\n</h3><p><a href=\"https://himalayas.app/companies/defuse-labs\">Defuse Labs</a> builds NEAR Intents, the universal transaction layer for the A",
+   "pubDate": 1791420064,
+   "expiryDate": 1796604063,
+   "applicationLink": "https://himalayas.app/companies/defuse-labs/jobs/head-of-product-marketing-growth?utm_source=api",
+   "guid": "https://himalayas.app/companies/defuse-labs/jobs/head-of-product-marketing-growth"
+  },
+  {
+   "title": "Head of Product Design",
+   "excerpt": "Join the Tilt teamAt Tilt, we see a side of people that traditional lenders miss.",
+   "companyName": "Tilt",
+   "companySlug": "tilt-com",
+   "employmentType": "Full Time",
+   "minSalary": 250000,
+   "maxSalary": 300000,
+   "salaryPeriod": "annual",
+   "seniority": [
+    "Director",
+    "Executive"
+   ],
+   "currency": "USD",
+   "locationRestrictions": [
+    "Canada",
+    "United States"
+   ],
+   "timezoneRestrictions": [
+    -10,
+    -9,
+    -8
+   ],
+   "categories": [
+    "Head-Of-Product-Design",
+    "Head-of-Design",
+    "Product-Designer"
+   ],
+   "parentCategories": [
+    "Design"
+   ],
+   "description": "<h3>Join the <a href=\"https://himalayas.app/companies/tilt-com\">Tilt</a> team</h3><p>At <a href=\"https://himalayas.app/companies/tilt-com\">Tilt</a>, we see a side of people that traditional lenders miss. Our mobile-first",
+   "pubDate": 1789467563,
+   "expiryDate": 1794651562,
+   "applicationLink": "https://himalayas.app/companies/tilt-com/jobs/head-of-product-design?utm_source=api",
+   "guid": "https://himalayas.app/companies/tilt-com/jobs/head-of-product-design"
+  },
+  {
+   "title": "Head of Product - Personal Banking",
+   "excerpt": "In 1967, John Shepherd-Barron reached his bank minutes after closing and could not get at his own money.",
+   "companyName": "Mercury",
+   "companySlug": "mercury",
+   "employmentType": "Full Time",
+   "minSalary": 289700,
+   "maxSalary": 362100,
+   "salaryPeriod": "annual",
+   "seniority": [
+    "Director"
+   ],
+   "currency": "USD",
+   "locationRestrictions": [
+    "Canada",
+    "United States"
+   ],
+   "timezoneRestrictions": [
+    -10,
+    -9,
+    -8
+   ],
+   "categories": [
+    "Product-Management",
+    "Head-of-Product",
+    "Personal-Banking"
+   ],
+   "parentCategories": [
+    "Product"
+   ],
+   "description": "<p>In 1967, John Shepherd-Barron reached his bank minutes after closing and could not get at his own money. In the bath that evening, he thought of a chocolate bar dispenser and swapped the chocolate for cash. On 27 June",
+   "pubDate": 1794511821,
+   "expiryDate": 1797041683,
+   "applicationLink": "https://himalayas.app/companies/mercury/jobs/head-of-product-personal-banking?utm_source=api",
+   "guid": "https://himalayas.app/companies/mercury/jobs/head-of-product-personal-banking"
+  },
+  {
+   "title": "Head of Product Design",
+   "excerpt": "Join the Tilt teamAt Tilt, we see a side of people that traditional lenders miss.",
+   "companyName": "Tilt",
+   "companySlug": "tilt-com",
+   "employmentType": "Full Time",
+   "minSalary": 250000,
+   "maxSalary": 300000,
+   "salaryPeriod": "annual",
+   "seniority": [
+    "Director",
+    "Executive"
+   ],
+   "currency": "USD",
+   "locationRestrictions": [
+    "Canada",
+    "United States"
+   ],
+   "timezoneRestrictions": [
+    -10,
+    -9,
+    -8
+   ],
+   "categories": [
+    "Head-Of-Product-Design",
+    "Head-of-Design",
+    "Product-Designer"
+   ],
+   "parentCategories": [
+    "Design"
+   ],
+   "description": "<h3>Join the <a href=\"https://himalayas.app/companies/tilt-com\">Tilt</a> team</h3><p>At <a href=\"https://himalayas.app/companies/tilt-com\">Tilt</a>, we see a side of people that traditional lenders miss. Our mobile-first",
+   "pubDate": 1789467563,
+   "expiryDate": 1794651562,
+   "applicationLink": "https://himalayas.app/companies/tilt-com/jobs/head-of-product-design?utm_source=api",
+   "guid": "https://himalayas.app/companies/tilt-com/jobs/head-of-product-design"
+  }
+ ]
+}

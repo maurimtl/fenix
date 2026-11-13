@@ -1,0 +1,42 @@
+{
+ "uuid": "84d388b6-7656-434c-8862-0312eb6b97ac",
+ "name": "Business Operations Manager",
+ "description": {
+  "company": "<div><body><h2 style='font-family:\"Basel Grotesk\",Arial,sans-serif;line-height:1.6;font-size:15pt;font-weight:600;letter-spacing:0.5px;margin-top:18px;margin-bottom:4px;padding-left:0px;'><b><strong style=\"white-space:pr",
+  "role": "<div><body><p style='font-family:\"Basel Grotesk\",Arial,sans-serif;font-size:11pt;font-weight:400;line-height:1.6;letter-spacing:0.25px;margin:4px 0px;padding:0px;'><br></p><h2 style='font-family:\"Basel Grotesk\",Arial,san"
+ },
+ "workLocations": [
+  "San Francisco, CA",
+  "New York, NY"
+ ],
+ "department": {
+  "name": "Bizops",
+  "base_department": "Bizops",
+  "department_tree": [
+   "Bizops"
+  ]
+ },
+ "employmentType": {
+  "label": "SALARIED_FT",
+  "id": "Salaried, full-time"
+ },
+ "createdOn": "2026-03-31T17:37:26.093000-07:00",
+ "eeocQuestionnaireEnabled": true,
+ "eeocQuestionnaireEnabledForJobPost": true,
+ "url": "https://ats.rippling.com/rippling/jobs/84d388b6-7656-434c-8862-0312eb6b97ac",
+ "payRangeDetails": [
+  {
+   "location": "US",
+   "currency": "USD",
+   "frequency": "YEAR",
+   "rangeStart": 185000.0,
+   "rangeEnd": 240000.0,
+   "isRemote": false
+  }
+ ],
+ "applicationConfirmationTemplate": "6348729c5a9a6e6df0bb6f64",
+ "hasAIEvaluationsEnabled": true,
+ "companyName": "Rippling",
+ "unlistedFromSearch": false,
+ "jsonLd": null
+}

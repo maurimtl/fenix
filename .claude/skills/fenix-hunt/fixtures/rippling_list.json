@@ -1,0 +1,71 @@
+{
+ "page": 0,
+ "pageSize": 50,
+ "totalItems": 718,
+ "totalPages": 15,
+ "items": [
+  {
+   "id": "84d388b6-7656-434c-8862-0312eb6b97ac",
+   "name": "Business Operations Manager",
+   "url": "https://ats.rippling.com/rippling/jobs/84d388b6-7656-434c-8862-0312eb6b97ac",
+   "department": {
+    "name": "Bizops",
+    "displayName": "Bizops"
+   },
+   "locations": [
+    {
+     "name": "New York, NY",
+     "country": "United States",
+     "countryCode": "US",
+     "state": "New York",
+     "stateCode": "NY",
+     "city": "New York",
+     "workplaceType": "ON_SITE"
+    }
+   ],
+   "language": "en-US"
+  },
+  {
+   "id": "84d388b6-7656-434c-8862-0312eb6b97ac",
+   "name": "Business Operations Manager",
+   "url": "https://ats.rippling.com/rippling/jobs/84d388b6-7656-434c-8862-0312eb6b97ac",
+   "department": {
+    "name": "Bizops",
+    "displayName": "Bizops"
+   },
+   "locations": [
+    {
+     "name": "San Francisco, CA",
+     "country": "United States",
+     "countryCode": "US",
+     "state": "California",
+     "stateCode": "CA",
+     "city": "San Francisco",
+     "workplaceType": "ON_SITE"
+    }
+   ],
+   "language": "en-US"
+  },
+  {
+   "id": "eb23a6c5-2260-4fb7-b1a5-7e4d23c4417d",
+   "name": "HR Associate (PST/EST Hours)",
+   "url": "https://ats.rippling.com/rippling/jobs/eb23a6c5-2260-4fb7-b1a5-7e4d23c4417d",
+   "department": {
+    "name": "Bizops",
+    "displayName": "Bizops"
+   },
+   "locations": [
+    {
+     "name": "Philippines",
+     "country": "Philippines",
+     "countryCode": "PH",
+     "state": null,
+     "stateCode": null,
+     "city": null,
+     "workplaceType": "REMOTE"
+    }
+   ],
+   "language": "en-US"
+  }
+ ]
+}

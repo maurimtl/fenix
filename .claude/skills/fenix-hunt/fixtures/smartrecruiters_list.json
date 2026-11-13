@@ -1,0 +1,156 @@
+{
+ "offset": 0,
+ "limit": 3,
+ "totalFound": 612,
+ "content": [
+  {
+   "id": "744000161548289",
+   "name": "AI Security Engineer Intern",
+   "uuid": "80e03fd6-8818-4a08-a108-b1583f265be0",
+   "jobAdId": "a6b0a25e-da0c-4fb1-a5c2-61bbf0a99707",
+   "defaultJobAd": true,
+   "refNumber": "JB0076579",
+   "company": {
+    "identifier": "ServiceNow",
+    "name": "ServiceNow"
+   },
+   "releasedDate": "2026-11-13T17:50:24.231Z",
+   "location": {
+    "city": "San Diego",
+    "region": "California",
+    "country": "us",
+    "address": "4810 Eastgate Mall",
+    "postalCode": "92121",
+    "remote": false,
+    "hybrid": false,
+    "fullLocation": "San Diego, California, United States"
+   },
+   "industry": {
+    "id": "it_and_services",
+    "label": "Information Technology And Services"
+   },
+   "department": {
+    "id": "3205510",
+    "label": "Digital Technology"
+   },
+   "function": {
+    "id": "other",
+    "label": "Other"
+   },
+   "typeOfEmployment": {
+    "id": "intern",
+    "label": "Intern"
+   },
+   "experienceLevel": {
+    "id": "not_applicable",
+    "label": "Not Applicable"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/ServiceNow/postings/744000161548289",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000161534520",
+   "name": "Senior Enterprise Account Executive",
+   "uuid": "371c26c5-5c68-4461-93fe-1f843b8d123a",
+   "jobAdId": "8bd42762-f3fd-49db-b253-60f54baed0b6",
+   "defaultJobAd": true,
+   "refNumber": "JB0077341",
+   "company": {
+    "identifier": "ServiceNow",
+    "name": "ServiceNow"
+   },
+   "releasedDate": "2026-11-13T16:35:42.443Z",
+   "location": {
+    "city": "Stockholm",
+    "country": "se",
+    "address": "Norrlandsgatan 15",
+    "postalCode": "111 43",
+    "remote": false,
+    "hybrid": false,
+    "fullLocation": "Stockholm, , Sweden"
+   },
+   "industry": {
+    "id": "it_and_services",
+    "label": "Information Technology And Services"
+   },
+   "department": {
+    "id": "2294208",
+    "label": "Sales"
+   },
+   "function": {
+    "id": "sales",
+    "label": "Sales"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "mid_senior_level",
+    "label": "Mid-Senior Level"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/ServiceNow/postings/744000161534520",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000161508814",
+   "name": "Enterprise Account Executive - Business Services",
+   "uuid": "62419e23-33ff-4fb1-bfb2-10c57b889982",
+   "jobAdId": "77295618-5656-41f1-afff-0232b8dbe451",
+   "defaultJobAd": true,
+   "refNumber": "JB0077319",
+   "company": {
+    "identifier": "ServiceNow",
+    "name": "ServiceNow"
+   },
+   "releasedDate": "2026-11-13T15:26:44.145Z",
+   "location": {
+    "city": "Orlando",
+    "region": "Florida",
+    "country": "us",
+    "address": "Remote",
+    "postalCode": "32801",
+    "remote": true,
+    "hybrid": false,
+    "fullLocation": "Orlando, Florida, United States"
+   },
+   "industry": {
+    "id": "it_and_services",
+    "label": "Information Technology And Services"
+   },
+   "department": {
+    "id": "2294208",
+    "label": "Sales"
+   },
+   "function": {
+    "id": "sales",
+    "label": "Sales"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "not_applicable",
+    "label": "Not Applicable"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/ServiceNow/postings/744000161508814",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  }
+ ]
+}

@@ -1,0 +1,111 @@
+{
+ "props": {
+  "pageProps": {
+   "initialJobs": {
+    "total": 2560,
+    "jobs": [
+     {
+      "id": "c2d9f4b2-d8aa-47c5-98e0-cadb3d330355",
+      "title": "Head of Product – Fundraising Technology",
+      "company": "givestar",
+      "location": "London, United Kingdom",
+      "city": "London",
+      "country": "United Kingdom",
+      "type": "full-time",
+      "remote": true,
+      "salaryCurrency": "GBP",
+      "salaryMin": 110000,
+      "salaryMax": 125000,
+      "salary": "£110,000 - £125,000 GBP",
+      "description": "<p><strong>About givestar</strong></p><p>givestar is building the next generation of charitable giving. Our platform is designed to make fundraising more social, engaging and rewarding for the people raising money, the c",
+      "requirements": [],
+      "benefits": [],
+      "tags": [],
+      "publishedAt": "2026-10-26T09:13:08.079Z",
+      "expiresAt": null,
+      "applicationUrl": "https://jobs.deel.com/givestar-careers/job-details/0d99cce0-7d76-4741-91a6-0fa6de4e2646/application",
+      "slug": "head-of-product-kn6ur1",
+      "featured": true,
+      "featuredStartAt": "2026-10-26T13:47:57.465Z",
+      "featuredEndAt": "2026-11-25T13:47:57.465Z",
+      "companyDescription": null,
+      "companyWebsite": "https://givestar.io/",
+      "source": "user",
+      "sourcePublishedAt": null,
+      "lastVerifiedAt": null,
+      "seniority": "director"
+     },
+     {
+      "id": "c0f427f4-f37b-4c0c-94d7-0ea4c87ae6fe",
+      "title": "Lead Product Designer",
+      "company": "Tide",
+      "location": "India, Bengaluru; India, Delhi NCR; India, Hyderabad",
+      "city": "India, Bengaluru; India, Delhi NCR; India, Hyderabad",
+      "country": null,
+      "type": "full-time",
+      "remote": false,
+      "salaryCurrency": null,
+      "salaryMin": null,
+      "salaryMax": null,
+      "salary": null,
+      "description": "<div class=\"content-intro\"><h3><strong>A</strong><strong>BOUT TIDE</strong></h3>\n<p>At Tide, we help SMEs save time and money in the running of their businesses by not only offering business accounts and related banking ",
+      "requirements": [],
+      "benefits": [],
+      "tags": [
+       "product-design",
+       "onsite"
+      ],
+      "publishedAt": "2026-11-13T17:07:44.299Z",
+      "expiresAt": null,
+      "applicationUrl": "https://job-boards.greenhouse.io/tide/jobs/8203048003",
+      "slug": "lead-product-designer-1c4d8d70b9dac7c8",
+      "featured": false,
+      "featuredStartAt": null,
+      "featuredEndAt": null,
+      "companyDescription": null,
+      "companyWebsite": "https://www.tide.co/",
+      "source": "greenhouse",
+      "sourcePublishedAt": "2026-11-13T16:38:45.000Z",
+      "lastVerifiedAt": "2026-11-13T17:07:44.299Z",
+      "seniority": "lead"
+     },
+     {
+      "id": "8a58ea7a-2070-4f29-8859-4f4979e73b7e",
+      "title": "Senior Product Marketing Manager, Enterprise Products",
+      "company": "Mistral AI",
+      "location": "London, United Kingdom",
+      "city": "London",
+      "country": "United Kingdom",
+      "type": "full-time",
+      "remote": false,
+      "salaryCurrency": null,
+      "salaryMin": null,
+      "salaryMax": null,
+      "salary": null,
+      "description": "<h2><strong>About Mistral</strong></h2><p>Mistral provides full-stack AI solutions: from frontier models to developer tools, applications, and compute. We partner with enterprises tackling the hardest problems across hig",
+      "requirements": [],
+      "benefits": [],
+      "tags": [
+       "product-marketing",
+       "hybrid",
+       "ai-native"
+      ],
+      "publishedAt": "2026-11-13T17:05:30.238Z",
+      "expiresAt": null,
+      "applicationUrl": "https://jobs.ashbyhq.com/mistral.ai/8c2a3927-c4f5-4b8d-9e93-daa268448105/application",
+      "slug": "senior-product-marketing-manager-enterprise-products-91039b7d6332e9f9",
+      "featured": false,
+      "featuredStartAt": null,
+      "featuredEndAt": null,
+      "companyDescription": "Frontier open-weight models you own and control. Customize with Forge, deploy with Studio, run on-prem, your VPC, or our cloud.",
+      "companyWebsite": "https://mistral.ai/",
+      "source": "ashby",
+      "sourcePublishedAt": "2026-11-13T16:48:38.812Z",
+      "lastVerifiedAt": "2026-11-13T17:05:30.238Z",
+      "seniority": "senior"
+     }
+    ]
+   }
+  }
+ }
+}

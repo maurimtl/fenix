@@ -1,4 +1,6 @@
-# Company job boards checked every hunt: slug:board (ashby|greenhouse|lever). Verified 2026-11-07.
+# Company job boards checked every hunt, one per line: slug:board[:extra]. Verified 2026-11-07.
+# board is ashby, greenhouse, lever, recruitee, workable, smartrecruiters, rippling, or workday (extra is then
+# "<wdN>/<site>", both from the careers address: nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite).
 # Add a company: find its careers page's board slug, add a line. Remove ones that never fit.
 # AI and analytics products
 hightouch-inc:ashby
@@ -65,3 +67,5 @@ anthropic:greenhouse
 openai:ashby
 xai:greenhouse
 cursor:ashby
+# Workday boards (added 2026-11-13). CrowdStrike's "VP, Horizontal AI Product" reached LinkedIn only through a reposter.
+crowdstrike:workday:wd5/crowdstrikecareers

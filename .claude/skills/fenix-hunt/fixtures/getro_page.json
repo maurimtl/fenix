@@ -1,0 +1,227 @@
+{
+ "props": {
+  "pageProps": {
+   "initialState": {
+    "jobs": {
+     "total": 12,
+     "found": [
+      {
+       "id": 99745186,
+       "organization": {
+        "stage": "other",
+        "topics": [
+         "B2C",
+         "Marketplace",
+         "Social enterprise"
+        ],
+        "name": "Charitable Impact",
+        "headCount": 3,
+        "id": 19960,
+        "industryTags": [
+         "Apps",
+         "Charity",
+         "Financial Management"
+        ],
+        "slug": "charitableimpact-com"
+       },
+       "compensationPublic": true,
+       "featured": false,
+       "compensationAmountMaxCents": null,
+       "searchableLocations": [
+        "Vancouver, BC, Canada",
+        "Greater Vancouver, BC, Canada",
+        "British Columbia, Canada"
+       ],
+       "createdAt": 1794569265,
+       "weight": 0,
+       "compensationAmountMinCents": null,
+       "source": "career_page",
+       "title": "Head of Product",
+       "workMode": "on_site",
+       "url": "https://chimp.bamboohr.com/careers/165",
+       "skills": [],
+       "locationDetails": [
+        {
+         "name": "Vancouver, BC, Canada",
+         "areaType": "locality",
+         "point": "POINT (-123.1207375 49.2827291)"
+        }
+       ],
+       "compensationOffersEquity": null,
+       "compensationCurrency": null,
+       "compensationPeriod": "period_not_defined",
+       "locations": [
+        "Vancouver, BC, Canada"
+       ],
+       "hasDescription": false,
+       "slug": "99745186-head-of-product",
+       "seniority": null
+      },
+      {
+       "id": 99322543,
+       "organization": {
+        "stage": "other",
+        "topics": [
+         "500+",
+         "B2B",
+         "Sensors/IoT"
+        ],
+        "name": "Geotab",
+        "headCount": 5,
+        "id": 22438,
+        "industryTags": [
+         "Analytics",
+         "Artificial Intelligence",
+         "Automotive"
+        ],
+        "slug": "geotab"
+       },
+       "compensationPublic": true,
+       "featured": false,
+       "compensationAmountMaxCents": 22000000,
+       "searchableLocations": [
+        "Remote"
+       ],
+       "createdAt": 1794127664,
+       "weight": 0,
+       "compensationAmountMinCents": 17000000,
+       "source": "career_page",
+       "title": "Head of Domain, Product & Engineering",
+       "workMode": "remote",
+       "url": "https://boards.greenhouse.io/geotab/jobs/5471107008",
+       "skills": [
+        "Product Management",
+        "Artificial Intelligence",
+        "Data Science"
+       ],
+       "locationDetails": [
+        {
+         "name": "Remote",
+         "areaType": "global",
+         "point": null
+        }
+       ],
+       "compensationOffersEquity": false,
+       "compensationCurrency": "USD",
+       "compensationPeriod": "year",
+       "locations": [
+        "Remote"
+       ],
+       "hasDescription": true,
+       "slug": "99322543-head-of-domain-product-engineering",
+       "seniority": "director"
+      },
+      {
+       "id": 98813918,
+       "organization": {
+        "stage": "acquisition",
+        "topics": [
+         "B2B",
+         "C100 alumni",
+         "Finance"
+        ],
+        "name": "Joist",
+        "headCount": 2,
+        "id": 4530,
+        "industryTags": [
+         "Application Software",
+         "Construction",
+         "Enterprise Software"
+        ],
+        "slug": "joist"
+       },
+       "compensationPublic": true,
+       "featured": false,
+       "compensationAmountMaxCents": 27000000,
+       "searchableLocations": [
+        "Ontario, Canada",
+        "Canada",
+        "Toronto, ON, Canada"
+       ],
+       "createdAt": 1793708432,
+       "weight": 0,
+       "compensationAmountMinCents": 24000000,
+       "source": "career_page",
+       "title": "Head of Product, Invoice Simple",
+       "workMode": "remote",
+       "url": "https://evercommerce.wd1.myworkdayjobs.com/EverCommerce_Careers/job/Toronto-Ontario/Head-of-Product--Invoice-Simple_R-106621-1",
+       "skills": [
+        "Product Management",
+        "Software as a Service (SaaS)",
+        "Payment Processing"
+       ],
+       "locationDetails": [
+        {
+         "name": "Ontario, Canada",
+         "areaType": "administrative_area_level_1",
+         "point": "POINT (-85.323214 51.25377499999999)"
+        },
+        {
+         "name": "Toronto, ON, Canada",
+         "areaType": "locality",
+         "point": "POINT (-79.3831843 43.653226)"
+        },
+        {
+         "name": "Remote",
+         "areaType": "global",
+         "point": null
+        }
+       ],
+       "compensationOffersEquity": true,
+       "compensationCurrency": "CAD",
+       "compensationPeriod": "year",
+       "locations": [
+        "Ontario, Canada",
+        "Toronto, ON, Canada",
+        "Remote"
+       ],
+       "hasDescription": true,
+       "slug": "98813918-head-of-product-invoice-simple",
+       "seniority": "director"
+      },
+      {
+       "id": 98768163,
+       "organization": {
+        "stage": "series_c",
+        "topics": [],
+        "name": "Remote",
+        "headCount": 6,
+        "id": 24702,
+        "industryTags": [
+         "Administrative Services",
+         "Analytics",
+         "Bookkeeping and Payroll"
+        ],
+        "slug": "remote"
+       },
+       "compensationPublic": true,
+       "featured": false,
+       "compensationAmountMaxCents": 21459841,
+       "searchableLocations": [],
+       "createdAt": 1793702767,
+       "weight": 0,
+       "compensationAmountMinCents": 12022320,
+       "source": "career_page",
+       "title": "Head of Product Led Growth",
+       "workMode": "on_site",
+       "url": "https://remote.com/jobs/re-build-manufacturing-c1ic4mpk/head-of-product-led-growth-j1ln7ui4",
+       "skills": [
+        "Customer Lifecycle Management",
+        "Data Analysis",
+        "Collaboration"
+       ],
+       "locationDetails": [],
+       "compensationOffersEquity": true,
+       "compensationCurrency": "USD",
+       "compensationPeriod": "year",
+       "locations": [],
+       "hasDescription": true,
+       "slug": "98768163-head-of-product-led-growth",
+       "seniority": "director"
+      }
+     ]
+    }
+   }
+  }
+ }
+}

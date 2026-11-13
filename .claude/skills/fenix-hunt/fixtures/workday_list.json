@@ -1,0 +1,32 @@
+{
+ "total": 1201,
+ "jobPostings": [
+  {
+   "title": "Product Manager - Open Models",
+   "externalPath": "/job/China-Beijing/Product-Manager---Open-Models_JR2023506",
+   "locationsText": "3 Locations",
+   "postedOn": "Posted 8 Days Ago",
+   "bulletFields": [
+    "JR2023506"
+   ]
+  },
+  {
+   "title": "Senior Product Manager - Telecom",
+   "externalPath": "/job/US-CA-Santa-Clara/Senior-Product-Manager---Telecom_JR2028509",
+   "locationsText": "2 Locations",
+   "postedOn": "Posted 14 Days Ago",
+   "bulletFields": [
+    "JR2028509"
+   ]
+  },
+  {
+   "title": "OEM Product Manager, Networking",
+   "externalPath": "/job/US-CA-Santa-Clara/OEM-Product-Manager--Networking_JR2029425",
+   "locationsText": "US, CA, Santa Clara",
+   "postedOn": "Posted 4 Days Ago",
+   "bulletFields": [
+    "JR2029425"
+   ]
+  }
+ ]
+}

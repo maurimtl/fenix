@@ -1,0 +1,40 @@
+{
+ "jobPostingInfo": {
+  "id": "19aa5bb61d0a103d138656fde0e80000",
+  "title": "Product Manager - Open Models",
+  "jobDescription": "<p>Ready to drive transformation in AI models? At NVIDIA, our team focuses on improving community models like Qwen, Kimi, Minimax, StepFun. As a Product Manager for Open Models, you will work with groundbreaking technolo",
+  "location": "China, Beijing",
+  "additionalLocations": [
+   "China, Shanghai",
+   "China, Shenzhen"
+  ],
+  "postedOn": "Posted 8 Days Ago",
+  "startDate": "2026-11-05",
+  "timeType": "Full time",
+  "jobReqId": "JR2023506",
+  "jobPostingId": "Product-Manager---Open-Models_JR2023506",
+  "jobPostingSiteId": "NVIDIAExternalCareerSite",
+  "country": {
+   "descriptor": "China",
+   "id": "6cb77610a8a543aea2d6bc10457e35d4"
+  },
+  "canApply": true,
+  "posted": true,
+  "includeResumeParsing": true,
+  "jobRequisitionLocation": {
+   "descriptor": "China, Beijing",
+   "country": {
+    "descriptor": "China",
+    "id": "6cb77610a8a543aea2d6bc10457e35d4",
+    "alpha2Code": "CN"
+   }
+  },
+  "externalUrl": "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite/job/China-Beijing/Product-Manager---Open-Models_JR2023506",
+  "questionnaireId": "2f2764b3a82910064296831695150000"
+ },
+ "hiringOrganization": {
+  "name": "CN19 NVIDIA Semiconductor Technology (Beijing) Co., Ltd.",
+  "url": ""
+ },
+ "userAuthenticated": false
+}

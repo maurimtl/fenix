@@ -1,0 +1,152 @@
+{
+ "props": {
+  "pageProps": {
+   "apolloState": {
+    "data": {
+     "StartupResult:7508298": {
+      "__typename": "StartupResult",
+      "id": "7508298",
+      "companySize": "SIZE_11_50",
+      "highConcept": "Secfix helps SMBs get and stay compliant, fast and easy",
+      "highlightedJobListings": [
+       {
+        "__ref": "JobListingSearchResult:4995381"
+       },
+       {
+        "__ref": "JobListingSearchResult:4491666"
+       }
+      ],
+      "name": "Secfix",
+      "slug": "secfix"
+     },
+     "StartupResult:11078791": {
+      "__typename": "StartupResult",
+      "id": "11078791",
+      "companySize": "SIZE_11_50",
+      "highConcept": "Legal AI for disability law",
+      "highlightedJobListings": [
+       {
+        "__ref": "JobListingSearchResult:4409089"
+       }
+      ],
+      "name": "Page",
+      "slug": "page-14"
+     },
+     "StartupResult:7425251": {
+      "__typename": "StartupResult",
+      "id": "7425251",
+      "companySize": "SIZE_11_50",
+      "highConcept": "Empowering women to take control of their health across their lives with hormone data",
+      "highlightedJobListings": [
+       {
+        "__ref": "JobListingSearchResult:4779342"
+       }
+      ],
+      "name": "Eli Health",
+      "slug": "eli-health"
+     },
+     "JobListingSearchResult:4995381": {
+      "__typename": "JobListingSearchResult",
+      "autoPosted": false,
+      "atsSource": "AtsIntegration::Ashby::Listing",
+      "description": "**Location:** Remote (EMEA) · Germany/Munich preferred - CET/CEST time zone\n\nHi — I'm Grigory, co-founder and CTO at Secfix.\n\nAt Secfix we're building security compliance systems for teams and agents to become and stay c",
+      "jobType": "full-time",
+      "liveStartAt": 1793924801,
+      "locationNames": [
+       "Munich"
+      ],
+      "primaryRoleTitle": "Engineering Manager",
+      "remote": true,
+      "remoteConfig": null,
+      "acceptedRemoteLocationNames": [
+       "Germany"
+      ],
+      "slug": "head-of-product-engineering",
+      "title": "Head of Product Engineering",
+      "compensation": "",
+      "yearsExperienceMin": null,
+      "yearsExperienceMax": null,
+      "id": "4995381",
+      "isBookmarked": false
+     },
+     "JobListingSearchResult:4491666": {
+      "__typename": "JobListingSearchResult",
+      "autoPosted": false,
+      "atsSource": "AtsIntegration::Ashby::Listing",
+      "description": "***Munich-based hybrid with lots of flexibility.***  \n***C1 or C2 German language is essential.***\n\nAt Secfix, we’re at the forefront of automating security compliance in Europe. We help companies get and stay ISO 27001,",
+      "jobType": "full-time",
+      "liveStartAt": 1787959554,
+      "locationNames": [
+       "Munich"
+      ],
+      "primaryRoleTitle": "Account Executive",
+      "remote": true,
+      "remoteConfig": null,
+      "acceptedRemoteLocationNames": [
+       "Germany"
+      ],
+      "slug": "account-executive-smb-german-speaking",
+      "title": "Account Executive - SMB (German-speaking)",
+      "compensation": "",
+      "yearsExperienceMin": null,
+      "yearsExperienceMax": null,
+      "id": "4491666",
+      "isBookmarked": false
+     },
+     "JobListingSearchResult:4409089": {
+      "__typename": "JobListingSearchResult",
+      "autoPosted": false,
+      "atsSource": null,
+      "description": "**About Page**\nPage builds AI tools that help disability law firms work faster and more accurately. We started in VA disability, where we're trusted by many of the top firms in the country. Now we're building something b",
+      "jobType": "full-time",
+      "liveStartAt": 1782765928,
+      "locationNames": [
+       "San Francisco"
+      ],
+      "primaryRoleTitle": "Product Manager",
+      "remote": true,
+      "remoteConfig": {
+       "__typename": "JobListingRemoteConfig",
+       "kind": "ONSITE_OR_REMOTE",
+       "wfhFlexible": false
+      },
+      "acceptedRemoteLocationNames": [
+       "United States"
+      ],
+      "slug": "head-of-product",
+      "title": "Head of Product",
+      "compensation": "",
+      "yearsExperienceMin": 4,
+      "yearsExperienceMax": null,
+      "id": "4409089",
+      "isBookmarked": false
+     },
+     "JobListingSearchResult:4779342": {
+      "__typename": "JobListingSearchResult",
+      "autoPosted": false,
+      "atsSource": "AtsIntegration::Ashby::Listing",
+      "description": "**About us**\n\nEli Health is making continuous hormone monitoring possible so users can support their daily and long-term health. No more waiting days to track key biomarkers—get results you can use within minutes. Eli’s ",
+      "jobType": "full-time",
+      "liveStartAt": 1790637868,
+      "locationNames": [
+       "Montreal"
+      ],
+      "primaryRoleTitle": "Product Manager",
+      "remote": true,
+      "remoteConfig": null,
+      "acceptedRemoteLocationNames": [
+       "Canada"
+      ],
+      "slug": "head-of-product",
+      "title": "Head of Product",
+      "compensation": "",
+      "yearsExperienceMin": null,
+      "yearsExperienceMax": null,
+      "id": "4779342",
+      "isBookmarked": false
+     }
+    }
+   }
+  }
+ }
+}
