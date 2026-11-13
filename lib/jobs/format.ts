@@ -49,7 +49,7 @@ export function stageValue(stage: JobStage, closedReason: ClosedReason | null): 
 }
 
 export function stageHint(stage: JobStage, s: Pick<Settings, "floorUsd" | "homeCountryName">): string | undefined {
-  if (stage === "FOUND") return "Salary or remote policy unconfirmed";
+  if (stage === "FOUND") return "Salary, remote policy or posting age needs a look";
   if (stage === "SHORTLISTED") return `Clears ${usdK(s.floorUsd)}, remote from ${s.homeCountryName}`;
   if (stage === "CV_READY") return "Tailored CV drafted, ready to apply";
 }
@@ -109,6 +109,7 @@ const CHECK_LABEL: Record<string, string> = {
   comp_unknown: "Check salary",
   comp_estimate: "Salary is an estimate",
   remote_unclear: "Check remote policy",
+  stale: "Posted over 3 weeks ago",
 };
 
 export const checkLabel = (c: string) => CHECK_LABEL[c] ?? c;

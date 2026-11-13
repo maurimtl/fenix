@@ -58,6 +58,7 @@ export const NEW_SETTINGS: Settings = {
   targetTitles: [],
   queries: [],
   watchlistExtra: [],
+  dreamCompanies: [],
   cvFileName: "{name} - {company} - {role}",
   defaultTemplate: "plain",
 };

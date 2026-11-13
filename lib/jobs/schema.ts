@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { FX_TO_USD } from "./config";
-import { CLOSED_REASONS } from "@/lib/store/schemas";
+import { CLOSED_REASONS, POSTED_SOURCES } from "@/lib/store/schemas";
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 const amount = z.number().int().positive().max(10_000_000);
@@ -39,6 +39,22 @@ export const jobInputSchema = z
     redFlags: text(4000).nullish(),
     easyApply: z.boolean().nullish(),
     applicants: z.number().int().min(0).nullish(),
+
+    /** When the posting went up, and whether the company's board or the listing's "N days ago" said so. */
+    postedAt: z.iso.datetime({ offset: true }).nullish(),
+    postedAtSource: z.enum(POSTED_SOURCES).nullish(),
+    reposted: z.boolean().nullish(),
+
+    /** Where the role was first seen when that was not the posting, e.g. the "we're hiring" post that linked to it. */
+    foundVia: z.url({ protocol: /^https?$/ }).max(2000).nullish(),
+  })
+  .refine((j) => (j.postedAt == null) === (j.postedAtSource == null), {
+    message: "postedAt and postedAtSource go together",
+    path: ["postedAt"],
+  })
+  .refine((j) => j.postedAt == null || new Date(j.postedAt).getTime() <= Date.now() + 2 * 86_400_000, {
+    message: "postedAt is in the future",
+    path: ["postedAt"],
   })
   .refine((j) => j.compMin == null || j.compMax == null || j.compMin <= j.compMax, {
     message: "compMin must be <= compMax",

@@ -25,3 +25,21 @@ The dialog is a `<dialog open>` element; "Upload resume" creates its `input[type
 ## Easy Apply: typed text can drop characters
 
 Typing a long message into the top-choice textarea with `computer type` lost letters ("workflws", "ira"). Set long text with `form_input` and read the value back. Ticking "Mark job as a top choice" makes a 20–400 character message required.
+
+## Search page: no date sort, but paging, a 24-hour filter and an applicant filter work
+
+Tested on `/jobs/search-results/` on 2026-11-13:
+- `sortBy=DD` is dropped from the address and the cards stay in relevance order. There is no newest-first sort.
+- `f_TPR=r86400` limits results to the past 24 hours (all 25 cards were under a day old).
+- `start=25`, `start=50`, … page through results, 25 cards a page; the page shows "Page 1 / 2 / 3" controls.
+- `f_EA=true` is the "Under 10 applicants" filter and stays in the address.
+- Each card prints its age ("Posted 18 hours ago", "Posted 2 weeks ago", "Reposted 1 day ago"); some promoted cards print none.
+- The age is not reliable for reposts: Pacvue's "Reposted 1 day ago" role was first published on its Greenhouse board five weeks earlier. The company board's date is the one to trust.
+
+## Posts search takes the date filter and the sort in the address
+
+`/search/results/content/?keywords=<q>&datePosted="past-24h"&sortBy="date_posted"` (the quotes are part of the values) lists posts newest first; the page reorders the parameters but keeps them (tested 2026-11-13). Six posts load before scrolling. A search for "hiring" plus "head of product" returned posts from 2 minutes to 2 hours old, and one in six was a real opening; the rest were people announcing their own new job, newsletters and recruiters' lists. Links in posts are `lnkd.in` short links that redirect to the company's posting.
+
+Scrolling the results page did not load more than the first 6 to 12 posts, and the page's HTML carries no post address (no `urn:li:activity` ids), so a post can be identified by its author and opening words but not linked without opening its menu.
+
+`javascript_tool` returns "[BLOCKED: Cookie/query string data]" when the result contains a full address with a query string, such as `location.href` on this page. Return the text, hosts or paths instead.

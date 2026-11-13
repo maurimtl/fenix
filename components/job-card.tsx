@@ -3,6 +3,7 @@ import type { Job } from "@/lib/store/jobs";
 import { CompGauge } from "@/components/comp-gauge";
 import { JobStageSelect } from "@/components/job-stage-select";
 import { CLOSED_REASON_LABEL, REMOTE_TONE, checkLabel, compConfirmed, formatComp, noReplyDays, remoteLabel, stageDateLabel, usdRange } from "@/lib/jobs/format";
+import { ageLine, freshness } from "@/lib/jobs/freshness";
 import type { Settings } from "@/lib/store/schemas";
 import { pagePath } from "@/lib/profile-url";
 
@@ -21,6 +22,7 @@ export function JobCard({ job, settings, profile, now }: { job: Job; settings: S
       </Link>
       <div className="card-company">{job.company}</div>
       <div className="card-date">{stageDateLabel(job.stage, job.stageEnteredAt, job.stageDateKnown, now)}</div>
+      <div className={`card-age age-${freshness(job.postedAt, now)}`}>{ageLine(job, now)}</div>
       <NoReplyTag job={job} now={now} />
 
       <div className="card-comp">

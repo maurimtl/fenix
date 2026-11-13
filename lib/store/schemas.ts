@@ -19,6 +19,7 @@ export const STAGES = [
 ] as const;
 export const REMOTE_VERDICTS = ["country_ok", "sponsorship_offered", "us_only", "onsite", "unclear"] as const;
 export const COMP_SOURCES = ["posting", "company_site", "estimate", "unknown"] as const;
+export const POSTED_SOURCES = ["board", "listing"] as const;
 export const STAGE_SET_BY = ["agent", "user"] as const;
 export const CLOSED_REASONS = ["rejected", "passed", "low_fit", "fell_off", "posting_closed", "no_response"] as const;
 
@@ -34,6 +35,8 @@ export const settingsSchema = z.looseObject({
   targetTitles: z.array(str).default([]),
   queries: z.array(str).default([]),
   watchlistExtra: z.array(str).default([]),
+  /** Companies whose whole board the hunt reads (any product or growth title), as watchlist entries: "slug[:board[:extra]]". */
+  dreamCompanies: z.array(str).default([]),
   /** CV PDF file name pattern; {name}, {company}, {role} are filled in. */
   cvFileName: str.default("{name} - {company} - {role}"),
   defaultTemplate: str.default("sidebar"),
@@ -137,6 +140,12 @@ export const jobSchema = z.looseObject({
   /** Set when the company's board or LinkedIn says the posting is gone; the stage is left to the person. */
   postingClosedAt: optIsoDate,
   postingClosedEvidence: optStr,
+  /** When the posting went up. "board" is the company's own record; "listing" is an age read off LinkedIn or an aggregator. */
+  postedAt: optIsoDate,
+  postedAtSource: z.enum(POSTED_SOURCES).nullish(),
+  reposted: z.boolean().nullish(),
+  /** Where the hunt first saw the role when that was not the posting itself, e.g. a "we're hiring" post. */
+  foundVia: optStr,
   /** Linked CV version id. */
   cv: optStr,
   answers: z.array(answerSchema).default([]),
@@ -246,6 +255,10 @@ export const bannerSchema = z.looseObject({
   backgrounds: z.array(bannerBackgroundSchema).default([]),
   updatedAt: optIsoDate,
 });
+
+/** Roles and posts the hunt has judged: key ("<source>:<id>") to the day it was marked (YYYY-MM-DD). */
+export const huntSeenSchema = z.looseObject({ seen: z.record(z.string(), isoDate).default({}) });
+export type HuntSeen = z.infer<typeof huntSeenSchema>;
 
 export type Settings = z.infer<typeof settingsSchema>;
 export type ProfileRecord = z.infer<typeof profileSchema>;

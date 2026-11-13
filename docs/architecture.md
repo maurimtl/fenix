@@ -48,7 +48,7 @@ The built-ins are Plain (the default for new people), Classic, Executive, Gutter
 
 ## Jobs
 
-The hunt skill posts each job to `/api/p/<p>/jobs` with the facts it read and the page's own words as evidence. `lib/jobs/` decides the stage from the person's settings: Shortlisted, Needs a check (pay or remote policy unclear) or Filtered out. A stage the person sets is never moved by a later hunt. `pnpm check:closed` asks Ashby, Greenhouse and Lever whether open jobs are still posted.
+The hunt skill's scanner (`.claude/skills/fenix-hunt/scan.py`, Python standard library only) reads every job source that needs no browser: company boards and multi-company feeds, merged into one list. It gets the person's hunt settings and the roles already judged from `/api/p/<p>/hunt` (`lib/store/hunt.ts`, `data/<p>/hunt/seen.yaml`). The hunt skill posts each job to `/api/p/<p>/jobs` with the facts it read and the page's own words as evidence. `lib/jobs/` decides the stage from the person's settings: Shortlisted, Needs a check (pay or remote policy unclear) or Filtered out. A stage the person sets is never moved by a later hunt. `pnpm check:closed` asks Ashby, Greenhouse and Lever whether open jobs are still posted.
 
 ## The number rule
 

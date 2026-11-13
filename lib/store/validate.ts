@@ -9,6 +9,7 @@ import {
   describeIssues,
   jobSchema,
   memorySchema,
+  huntSeenSchema,
   linkedinDraftSchema,
   linkedinProfileSchema,
   type LinkedinProfile,
@@ -242,6 +243,10 @@ export async function validateProfile(profile: string, counter = { n: 0 }): Prom
 
   await checkInterviews(dir, new Set(jobs.map((j) => j.job.id)), sources, issues, counter);
   await checkBanner(p("linkedin"), sources, issues, counter);
+  if (await readText(p("hunt", "seen.yaml"))) {
+    counter.n++;
+    await parseWith(p("hunt", "seen.yaml"), huntSeenSchema, "yaml", issues);
+  }
   for (const [name, schema] of [["draft.yaml", linkedinDraftSchema], ["profile.yaml", linkedinProfileSchema]] as const) {
     const file = p("linkedin", name);
     if (!(await readText(file))) continue;

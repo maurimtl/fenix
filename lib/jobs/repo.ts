@@ -6,7 +6,8 @@ import { createJob, findJob, newJobId, readAllJobs, toJob, writeJob, type JobFil
 import type { JobRecord } from "@/lib/store/schemas";
 import { commitProfile } from "@/lib/store/history";
 import { classify } from "./classify";
-import { CLOSED_REASON_LABEL, compConfirmed, STAGE_LABEL } from "./format";
+import { bestMatchOrder, mergePosted } from "./freshness";
+import { CLOSED_REASON_LABEL, STAGE_LABEL } from "./format";
 import { defaultTemplateId } from "@/lib/templates/registry";
 import type { Overrides } from "@/lib/resume/schema";
 import type { JobInput } from "./schema";
@@ -24,17 +25,23 @@ function moveStage(d: JobRecord, stage: JobStage, by: StageSetBy, at: string): v
 
 // Lookup and write happen under the profile lock, so two callers posting the same job make one file.
 export async function upsertJob(profile: string, input: JobInput) {
-  const c = classify(input, await getSettings(profile));
+  const settings = await getSettings(profile);
   const { jdText, ...facts } = input;
   return withProfileLock(profile, async () => {
     const now = new Date().toISOString();
     const existing = (await readAllJobs(profile)).find(
       (j) => j.data.source === input.source && j.data.sourceJobId === input.sourceJobId,
     );
+    // Classified on the merged date, so a listing's "reposted yesterday" can't un-stale a job the board dates to last month.
+    const posted = mergePosted(existing?.data ?? {}, input);
+    // A re-save that sends no fit keeps the stored one, so a strong match isn't held as stale for the omission.
+    const fitScore = "fitScore" in input ? input.fitScore : existing?.data.fitScore;
+    const c = classify({ ...input, fitScore, postedAt: posted.postedAt }, settings);
 
     if (!existing) {
       const data = {
         ...facts,
+        ...posted,
         id: newJobId(),
         baseMaxUsd: c.baseMaxUsd,
         compSource: c.compSource,
@@ -54,8 +61,10 @@ export async function upsertJob(profile: string, input: JobInput) {
     }
 
     const d = existing.data;
+    // The first place a role was found stays; a later save from another source does not replace or clear it.
+    if (d.foundVia) delete facts.foundVia;
     const reclassify = d.stageSetBy === "agent" && AGENT_STAGES.includes(d.stage);
-    Object.assign(d, facts, { baseMaxUsd: c.baseMaxUsd, compSource: c.compSource, needsCheck: c.needsCheck, lastSeenAt: now, updatedAt: now });
+    Object.assign(d, facts, posted, { baseMaxUsd: c.baseMaxUsd, compSource: c.compSource, needsCheck: c.needsCheck, lastSeenAt: now, updatedAt: now });
     if (reclassify) {
       moveStage(d, c.stage, "agent", now);
       d.filterReason = c.filterReason;
@@ -144,18 +153,29 @@ export async function draftVariant(profile: string, jobId: string, name: string,
   });
 }
 
-// Comp-confirmed first, then fit, then newest.
-export async function listJobs(profile: string, filtered: boolean) {
+/** Sets a posting date read from the company's board. The stage is left alone; a board date already stored wins if earlier. */
+export async function setPostedFromBoard(profile: string, id: string, postedAt: string) {
+  return withProfileLock(profile, async () => {
+    const job = await findJob(profile, id);
+    if (!job) return false;
+    const d = job.data;
+    const merged = mergePosted(d, { postedAt, postedAtSource: "board" });
+    if (merged.postedAt === (d.postedAt ?? null) && merged.postedAtSource === (d.postedAtSource ?? null)) return true;
+    Object.assign(d, merged, { updatedAt: new Date().toISOString() });
+    await writeJob(job);
+    await commitProfile(profile, `job ${d.company} - ${d.title} posting date set from the company board`, [job.file]);
+    return true;
+  });
+}
+
+// Comp-confirmed first, then fresher postings, then fit, then newest seen.
+export async function listJobs(profile: string, filtered: boolean, now: Date = new Date()) {
   const jobs = (await readAllJobs(profile))
     .map(toJob)
     .filter((j) => (j.stage === "FILTERED_OUT") === filtered)
     .sort((a, b) => b.firstSeenAt.getTime() - a.firstSeenAt.getTime());
   if (filtered) return jobs.slice(0, 500);
-  return jobs.sort(
-    (a, b) =>
-      Number(compConfirmed(b.compSource)) - Number(compConfirmed(a.compSource)) ||
-      (b.fitScore ?? -1) - (a.fitScore ?? -1),
-  );
+  return jobs.sort(bestMatchOrder(now));
 }
 
 export async function getJob(profile: string, id: string) {

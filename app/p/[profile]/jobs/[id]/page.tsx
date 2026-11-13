@@ -8,6 +8,7 @@ import { interviewsForJob } from "@/lib/store/interviews";
 import { CompGauge } from "@/components/comp-gauge";
 import { JobStageSelect } from "@/components/job-stage-select";
 import { getJob } from "@/lib/jobs/repo";
+import { ageLine, freshness } from "@/lib/jobs/freshness";
 import { jobAnswers } from "@/lib/jobs/answers";
 import {
   REMOTE_TONE,
@@ -25,6 +26,15 @@ import { pagePath } from "@/lib/profile-url";
 
 export const dynamic = "force-dynamic";
 
+/** The site name of a link for display; the whole text when it is not a link (hand-edited files). */
+function hostOf(link: string): string {
+  try {
+    return new URL(link).hostname.replace(/^www\./, "");
+  } catch {
+    return link;
+  }
+}
+
 const PRE_APPLY = new Set(["FOUND", "SHORTLISTED", "CV_READY"]);
 const INTERVIEW_STAGES = new Set(["APPLIED", "INTERVIEWING"]);
 
@@ -40,6 +50,7 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
   ]);
   if (!job) notFound();
   const { minUsd, maxUsd } = usdRange(job);
+  const postedNow = new Date();
   const back = job.stage === "FILTERED_OUT" ? { href: pagePath(profile, "/jobs/filtered"), label: "Filtered out" } : { href: pagePath(profile, "/jobs"), label: "Pipeline" };
 
   return (
@@ -136,6 +147,30 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
               <p className="money money-lg">{formatComp(job)}</p>
               <CompGauge minUsd={minUsd} maxUsd={maxUsd} confirmed={compConfirmed(job.compSource)} floorUsd={settings.floorUsd} large />
               {job.compEvidence && <blockquote>{job.compEvidence}</blockquote>}
+            </section>
+
+            <section className="fact">
+              <h2>Posted</h2>
+              <p className={`card-age age-${freshness(job.postedAt, postedNow)}`}>{ageLine(job, postedNow)}</p>
+              {job.postedAt && (
+                <p className="muted small">
+                  {job.postedAt.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })},{" "}
+                  {job.postedAtSource === "board" ? "from the company's board" : "from the listing's own age line"}
+                  {job.reposted ? (job.postedAtSource === "board" ? "; the listing was marked reposted" : "; the listing was marked reposted, so it may be older") : ""}
+                </p>
+              )}
+              {job.foundVia && (
+                <p className="muted small">
+                  Found via{" "}
+                  {/^https?:\/\//i.test(job.foundVia) ? (
+                    <a href={job.foundVia} target="_blank" rel="noreferrer">
+                      {hostOf(job.foundVia)}
+                    </a>
+                  ) : (
+                    job.foundVia
+                  )}
+                </p>
+              )}
             </section>
 
             <section className="fact">

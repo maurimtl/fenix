@@ -23,6 +23,7 @@ Localhost-only, no auth. Start with `README.md`; the design is in `docs/architec
 
 - **Career record** (`career.yaml`, `profile.yaml`) = the fixed truth: profile, positions with bullets, education, skills, courses. Edited rarely.
 - **CV version** (`cvs/*.yaml`) = one tailored CV: overrides the headline/summary, picks and rewords bullets, picks skills, names a template. Never changes the career record.
+- **Hunt state** (`hunt/seen.yaml`): the roles and posts the hunt has already judged, written through `/api/p/<person>/hunt`.
 - **Jobs** (`jobs/*.md`), **stories** (`stories/*.md`), **interviews** (`interviews/*.md`, one per round, plus `interview-answers.md`), **memory** (`memory/`), **templates** (`templates/`).
 - **Number rule:** every number in a CV version or LinkedIn draft must already be in the career record or a story (`pnpm check:claims`).
 
@@ -50,7 +51,8 @@ Spec-driven: **fenix-spec → fenix-plan → fenix-build** (skills in `.claude/s
 - **`data/` is its own git repo**, ignored by this one. `pnpm backup` commits it and pushes when it has a remote. Restore: `git clone <private data repo> data`.
 - **Never run `git clean -ffdx` in this repo** (it is denied in `.claude/settings.json`): the doubled `-f` deletes the nested `data/` repo. A git worktree has no `data/`; set `FENIX_DATA_DIR` to the main checkout's `data/` there.
 - `pnpm check:closed <person> [--write]` asks Ashby, Greenhouse and Lever whether open jobs are still posted; `--write` marks closed ones.
-- Checks: `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm check:data`, `check:claims`, `check:templates`, `check:isolation`, `check:public`, `check:store`, `check:jobs`, `check:resolve`, `check:tailor`, `check:liveness`, `check:start`.
+- `pnpm backfill:posted <person> [--write]` asks the same boards when open and applied jobs were posted; `--write` stores the date. Jobs carry `postedAt`; one 21 days old or more with fit under `strongMatchFit` is held in Found as stale (`lib/jobs/freshness.ts`).
+- Checks: `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm check:data`, `check:claims`, `check:templates`, `check:isolation`, `check:public`, `check:store`, `check:jobs`, `check:hunt` (the hunt scanner's parsers, offline), `check:resolve`, `check:tailor`, `check:liveness`, `check:start`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -45,3 +45,30 @@ Teradata's careers site makes you create a profile (email plus a privacy box, th
 ## Jobgether on LinkedIn hides the hiring company
 
 Jobgether reposts other companies' roles on LinkedIn as "on behalf of a partner company", with the company name removed and Jobgether handling the application. On 2026-11-12 its "Senior Director, Product Growth" (Canada, $250–300K) was Roofr's own posting word for word, and Roofr was already in the pipeline as Applied. Before saving a Jobgether role, search a distinctive phrase or pay band from it to find the real company, then dedupe and apply through that company's board.
+
+Ladders does the same ("For our client, we are seeking…", a shortened description with the original pay band and benefits list). On 2026-11-13 its "VP, Horizontal AI Product (Remote)" was CrowdStrike requisition R30807 (Workday) and its "Senior Director, Product Growth" was Hello Heart's Greenhouse posting. Searching the exact title plus the pay band finds the original; save the role under the real company, not as a second row.
+
+## iCIMS: attaching the CV inside the frame
+
+`file_upload` and `find` can't see into `iframe#icims_content_iframe`, and loading the frame's own URL as the page just re-wraps it. On Kinaxis (2026-11-13) this worked instead: serve the one PDF from a throwaway local server on `127.0.0.1` (CORS allowed for the iCIMS origin only, plus `Access-Control-Allow-Private-Network: true`), then in `javascript_tool` use the frame's own `fetch`, `File` and `DataTransfer` to set `input[type=file].files` and dispatch `change`. The page reloads with the file name shown and fills name, phone and address from the CV. Stop the server straight after. Do it before typing anything, since the upload overwrites fields.
+
+## Which job sources a script can read (tested 2026-11-13)
+
+`scan.py` reads these without a browser. The exact requests are in `hunt_ats.py` and `hunt_feeds.py`; the quirks worth knowing:
+
+- **Himalayas** (`himalayas.app/jobs/api/search?q=…&country=CA&seniority=Director`): `country` keeps roles that list the country plus roles open worldwide. `seniority` takes `Director` or `Executive`, one per request. It answers 429 after about ten quick requests, so the reader waits 3 seconds between them. The link it gives is a Himalayas page, not the company's posting.
+- **Getro boards** (Communitech at `www1.communitech.ca`, Khosla, Accel, General Catalyst, Georgian, Radical): the job list is embedded in the board's public page (`/jobs?q=…`), 20 results per search and no paging. `api.getro.com` answers too, but its robots file disallows scripts, so the reader does not call it. The boards' robots files ask for 10 seconds between requests. `searchableLocations` adds parent regions ("North America" on a New York role), so only `locations` says where a role is. Accel and General Catalyst list remote.com reposts with the company named "Remote"; the reader drops them.
+- **Wellfound** (`wellfound.com/role/r/<role>`): the remote role pages for `head-of-product` and `vp-of-product` exist; `director-of-product`, `head-of-growth` and any `/canada` path redirect away. Each listing has `acceptedRemoteLocationNames`.
+- **Y Combinator** (`ycombinator.com/jobs/role/product-manager`): the `/canada` path matches California ("CA"), not Canada. `visa` says whether a role is US-only. Few roles at Director or above.
+- **Mind the Product**: only the newest 20 roles are in the page; filters and paging go through an API its robots file disallows.
+- **Workday** (`<tenant>.wd<N>.myworkdayjobs.com/wday/cxs/<tenant>/<site>/jobs`): 20 per page at most. Some sites accept a country filter (`locationCountry`, Canada is `a30a87ed25634629aa6c3958aa2b91ea`; CrowdStrike does, Nvidia does not). The list has no description or exact date; the posting's own address under `/wday/cxs/…` has both.
+- **Amazon** (`amazon.jobs/en/search.json?base_query=product&country=CAN&sort=recent`): a loose text match, so the title filter does the work.
+- **Himalayas' apply link needs a Himalayas account**, and its `pubDate` is when it listed the role, which can be months after the company posted it. Find the role on the company's own board for the link and the date.
+- **Workday site names are not guessable.** `autodesk.wd1.myworkdayjobs.com/…/Ext` answers but holds 4 roles; Autodesk's main careers site is under another name. Read the site name off the company's careers page address.
+- **Blocked for scripts, fine in Chrome:** startup.jobs (`?q=<title>&remote=true`) and hiring.cafe (`?searchState=` with URL-encoded JSON such as `{"searchQuery":"head of product"}`; it defaults to the visitor's country).
+- **Not worth reading:** Remote OK, Remotive, Working Nomads and Hacker News "Who is hiring" had no fitting senior product roles; Indeed and Glassdoor answer 403; TrueUp ignores its title filter in the address (Lenny's Jobs is built on it); ExecThread needs a LinkedIn sign-in; Built In has no path that restricts to Canada; a16z, Sequoia, Bessemer, Lightspeed, Kleiner Perkins and First Round show scripts a captcha.
+
+## Google and Meta careers
+
+- Google: `google.com/about/careers/applications/jobs/results?q="product manager"&location=Canada` returns a count ("5 jobs matched") and role titles in `h3` elements. A plain `q=product` matches 46 roles, mostly sales and engineering.
+- Meta: `metacareers.com/jobsearch/?q=product manager&offices[0]=Toronto, ON&offices[1]=Montreal, Canada&offices[2]=Remote, Canada` keeps the offices in the address and shows "N Items".

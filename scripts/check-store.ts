@@ -164,6 +164,15 @@ await check("a job missing company is reported by field", async () => {
   assert.equal(issues[0].file, "v/jobs/acme.md");
   assert.match(issues[0].problem, /^company: /);
 });
+await check("a job with a posting date loads, and an unknown date source is reported by field", async () => {
+  const dated = { ...job, postedAt: "2026-10-05T14:00:00.000Z", postedAtSource: "board", reposted: true };
+  await files.writeAtomic(profilePath("v", "jobs", "acme.md"), files.stringifyFrontMatter({ data: dated, body: "" }));
+  assert.deepEqual(await validateProfile("v"), []);
+  await files.writeAtomic(profilePath("v", "jobs", "acme.md"), files.stringifyFrontMatter({ data: { ...dated, postedAtSource: "rumour" }, body: "" }));
+  const issues = await validateProfile("v");
+  assert.equal(issues.length, 1);
+  assert.match(issues[0].problem, /^postedAtSource: /);
+});
 await check("a CV naming a missing bullet is reported with both", async () => {
   await files.writeAtomic(profilePath("v", "jobs", "acme.md"), files.stringifyFrontMatter({ data: job, body: "" }));
   await files.writeAtomic(profilePath("v", "cvs", "acme.yaml"), files.toYaml({
@@ -215,6 +224,23 @@ await check("a save commits only its own files; a hand edit stays uncommitted; d
   assert.equal(await commitProfile("g", "skill files", "all"), true);
   assert.equal(git("status", "--porcelain", "--", "g/"), "");
   await fs.rm(path.join(ROOT, ".git"), { recursive: true, force: true });
+});
+
+await check("hunt seen list: add, re-add, old keys dropped, a malformed file is an error and is not overwritten", async () => {
+  const { addHuntSeen, readHuntSeen } = await import("../lib/store/hunt");
+  const file = profilePath("h", "hunt", "seen.yaml");
+  assert.deepEqual(await readHuntSeen("h"), { seen: {} });
+  const day1 = new Date("2026-01-10T12:00:00Z");
+  assert.deepEqual(await addHuntSeen("h", ["ashby:1", "himalayas:acme/jobs/vp-product"], day1), { added: 2, total: 2 });
+  assert.deepEqual(await addHuntSeen("h", ["ashby:1"], new Date("2026-02-01T12:00:00Z")), { added: 0, total: 2 });
+  assert.deepEqual((await readHuntSeen("h")).seen, { "ashby:1": "2026-01-10", "himalayas:acme/jobs/vp-product": "2026-01-10" });
+  // 181 days after day 1: the old keys go when the next key is written.
+  assert.deepEqual(await addHuntSeen("h", ["post:https://x.com/a/status/1"], new Date("2026-07-10T12:00:00Z")), { added: 1, total: 1 });
+  assert.deepEqual((await readHuntSeen("h")).seen, { "post:https://x.com/a/status/1": "2026-07-10" });
+  await files.writeAtomic(file, "seen: [not, a, map]\n");
+  await assert.rejects(readHuntSeen("h"), /hunt\/seen\.yaml/);
+  await assert.rejects(addHuntSeen("h", ["ashby:2"]), /hunt\/seen\.yaml/);
+  assert.equal(await files.readText(file), "seen: [not, a, map]\n");
 });
 
 await fs.rm(ROOT, { recursive: true, force: true });

@@ -4,6 +4,9 @@ import { jobPatchSchema } from "../lib/jobs/schema";
 import { formatComp, noReplyDays, stageDateLabel } from "../lib/jobs/format";
 import { stageEnteredAt } from "../lib/store/jobs";
 import { filterBoard, inWindow, parseBoardView, sortColumn, viewHref } from "../lib/jobs/board-view";
+import { ageLine, bestMatchOrder, freshness, FRESHNESS_RANK, mergePosted, postingAgeDays } from "../lib/jobs/freshness";
+import { jobInputSchema } from "../lib/jobs/schema";
+import { boardDate } from "../lib/jobs/posted-date";
 
 const cases: [string, Parameters<typeof classify>[0], ReturnType<typeof classify>][] = [
   ["180-220k USD posting, country_ok → filtered on comp",
@@ -68,6 +71,10 @@ try {
 process.env.TZ = "America/Toronto";
 const NOW = new Date(2026, 10, 11, 12);
 const at = (iso: string) => ({ stageEnteredAt: new Date(iso) });
+const CLOCK = new Date("2026-11-11T12:00:00.000Z");
+const PAID = { compMax: 300000, currency: "USD", compSource: "posting", remoteVerdict: "country_ok" } as const;
+const pick = (c: ReturnType<typeof classify>) => ({ stage: c.stage, needsCheck: c.needsCheck });
+const INPUT = { source: "linkedin", sourceJobId: "1", url: "https://x.test/1", company: "Acme", title: "VP Product", compSource: "unknown", remoteVerdict: "unclear" };
 const extra: [string, () => void][] = [
   ["board: the time zone is pinned for these cases", () => assert.equal(new Date(2026, 10, 11).toISOString(), "2026-11-11T05:00:00.000Z")],
   ["board: since=7d includes the 6th day back from midnight", () => assert.equal(inWindow(at("2026-11-05T00:00:00-05:00"), parseBoardView({ since: "7d" }, NOW)), true)],
@@ -107,8 +114,103 @@ const extra: [string, () => void][] = [
     const shown = filterBoard(jobs, parseBoardView({ since: "7d" }, NOW));
     assert.deepEqual([shown.length, jobs.length], [3, 5]);
   }],
+  // Posting age. CLOCK is a literal instant; every expected value below is written out by hand.
+  ["age: 30 days old, fit 60 → held in Found as stale", () =>
+    assert.deepEqual(pick(classify({ ...PAID, fitScore: 60, postedAt: "2026-10-12T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK)), { stage: "FOUND", needsCheck: ["stale"] })],
+  ["age: 30 days old, fit 80 → shortlisted (strong fit)", () =>
+    assert.deepEqual(pick(classify({ ...PAID, fitScore: 80, postedAt: "2026-10-12T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK)), { stage: "SHORTLISTED", needsCheck: [] })],
+  ["age: 3 days old, fit 60 → shortlisted", () =>
+    assert.deepEqual(pick(classify({ ...PAID, fitScore: 60, postedAt: "2026-11-08T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK)), { stage: "SHORTLISTED", needsCheck: [] })],
+  ["age: no date, fit 60 → shortlisted (undated is not penalized)", () =>
+    assert.deepEqual(pick(classify({ ...PAID, fitScore: 60 }, HIGHER_FLOOR, CLOCK)), { stage: "SHORTLISTED", needsCheck: [] })],
+  ["age: 30 days old with no fit score → stale", () =>
+    assert.deepEqual(pick(classify({ ...PAID, postedAt: "2026-10-12T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK)), { stage: "FOUND", needsCheck: ["stale"] })],
+  ["age: exactly 21 days is stale, 20 is not", () => {
+    assert.equal(classify({ ...PAID, fitScore: 60, postedAt: "2026-10-21T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK).stage, "FOUND");
+    assert.equal(classify({ ...PAID, fitScore: 60, postedAt: "2026-10-22T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK).stage, "SHORTLISTED");
+  }],
+  ["age: the person's own strong-fit setting is used", () =>
+    assert.equal(classify({ ...PAID, fitScore: 60, postedAt: "2026-10-12T12:00:00.000Z" }, { floorUsd: 250_000, strongMatchFit: 55 }, CLOCK).stage, "SHORTLISTED")],
+  ["age: stale with unknown pay keeps only the pay check", () =>
+    assert.deepEqual(pick(classify({ compMax: null, currency: null, compSource: "unknown", remoteVerdict: "country_ok", fitScore: 60, postedAt: "2026-10-12T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK)), { stage: "FOUND", needsCheck: ["comp_unknown"] })],
+  ["age: a stale US-only job is still filtered out", () =>
+    assert.equal(classify({ ...PAID, remoteVerdict: "us_only", fitScore: 60, postedAt: "2026-10-12T12:00:00.000Z" }, HIGHER_FLOOR, CLOCK).stage, "FILTERED_OUT")],
+  ["age: days and labels across the scale", () =>
+    assert.deepEqual(
+      ["2026-11-11T11:00:00.000Z", "2026-11-10T12:00:00.000Z", "2026-11-09T12:00:00.000Z", "2026-11-04T12:00:00.000Z", "2026-11-03T12:00:00.000Z", "2026-10-28T12:00:00.000Z", "2026-10-27T12:00:00.000Z", "2026-10-22T12:00:00.000Z", "2026-10-21T12:00:00.000Z"]
+        .map((d) => `${postingAgeDays(d, CLOCK)}:${freshness(d, CLOCK)}`),
+      ["0:today", "1:today", "2:week", "7:week", "8:edge", "14:edge", "15:old", "20:old", "21:stale"])],
+  ["age: no date, a bad date and a future date", () =>
+    assert.deepEqual([freshness(null, CLOCK), freshness("not a date", CLOCK), postingAgeDays("2026-11-12T12:00:00.000Z", CLOCK)], ["unknown", "unknown", 0])],
+  ["age line: yesterday, this week, edge, stale, reposted, unknown", () =>
+    assert.deepEqual(
+      [
+        ageLine({ postedAt: new Date("2026-11-10T12:00:00.000Z") }, CLOCK),
+        ageLine({ postedAt: "2026-11-06T12:00:00.000Z" }, CLOCK),
+        ageLine({ postedAt: "2026-11-02T12:00:00.000Z" }, CLOCK),
+        ageLine({ postedAt: "2026-10-12T12:00:00.000Z" }, CLOCK),
+        ageLine({ postedAt: "2026-11-06T12:00:00.000Z", reposted: true }, CLOCK),
+        ageLine({ postedAt: null }, CLOCK),
+        ageLine({ postedAt: CLOCK }, CLOCK),
+      ],
+      ["1 day", "5 days", "Edge · 9 days", "Stale · 30 days", "5 days · reposted", "Age unknown", "Today"])],
+  ["age order: today, this week, then edge and undated together, then old, then stale", () =>
+    assert.deepEqual((["today", "week", "edge", "unknown", "old", "stale"] as const).map((f) => FRESHNESS_RANK[f]), [0, 1, 2, 2, 3, 4])],
+  ["age order: with pay confirmed on both, the fresher job leads even at a lower fit; unconfirmed pay still goes last", () => {
+    const jobs = [
+      { id: "old-high-fit", compSource: "posting" as const, postedAt: "2026-10-12T12:00:00.000Z", fitScore: 90 },
+      { id: "unconfirmed-today", compSource: "unknown" as const, postedAt: "2026-11-11T08:00:00.000Z", fitScore: 95 },
+      { id: "fresh-low-fit", compSource: "posting" as const, postedAt: "2026-11-09T12:00:00.000Z", fitScore: 60 },
+      { id: "undated", compSource: "company_site" as const, postedAt: null, fitScore: 70 },
+      { id: "fresh-higher-fit", compSource: "posting" as const, postedAt: "2026-11-08T12:00:00.000Z", fitScore: 75 },
+    ];
+    assert.deepEqual(jobs.sort(bestMatchOrder(CLOCK)).map((j) => j.id), ["fresh-higher-fit", "fresh-low-fit", "undated", "old-high-fit", "unconfirmed-today"]);
+  }],
+  ["posted date: a later listing date leaves a board date alone", () =>
+    assert.deepEqual(
+      mergePosted({ postedAt: "2026-10-05T00:00:00.000Z", postedAtSource: "board" }, { postedAt: "2026-11-12T00:00:00.000Z", postedAtSource: "listing", reposted: true }),
+      { postedAt: "2026-10-05T00:00:00.000Z", postedAtSource: "board", reposted: true })],
+  ["posted date: a board date replaces a listing date, even a later one", () =>
+    assert.deepEqual(
+      mergePosted({ postedAt: "2026-10-05T00:00:00.000Z", postedAtSource: "listing" }, { postedAt: "2026-10-20T00:00:00.000Z", postedAtSource: "board" }),
+      { postedAt: "2026-10-20T00:00:00.000Z", postedAtSource: "board", reposted: false })],
+  ["posted date: a re-post never moves a listing date forward", () =>
+    assert.deepEqual(
+      mergePosted({ postedAt: "2026-10-05T00:00:00.000Z", postedAtSource: "listing" }, { postedAt: "2026-11-12T00:00:00.000Z", postedAtSource: "listing" }),
+      { postedAt: "2026-10-05T00:00:00.000Z", postedAtSource: "listing", reposted: false })],
+  ["posted date: an earlier listing date replaces a later one", () =>
+    assert.equal(mergePosted({ postedAt: "2026-11-12T00:00:00.000Z", postedAtSource: "listing" }, { postedAt: "2026-11-01T00:00:00.000Z", postedAtSource: "listing" }).postedAt, "2026-11-01T00:00:00.000Z")],
+  ["posted date: a save with no date, or an explicit null, keeps the stored one and its reposted mark", () => {
+    const stored = { postedAt: "2026-10-05T00:00:00.000Z", postedAtSource: "board" as const, reposted: true };
+    assert.deepEqual(mergePosted(stored, {}), stored);
+    assert.deepEqual(mergePosted(stored, { postedAt: null, postedAtSource: null, reposted: null }), stored);
+  }],
+  ["posted date: nothing stored and nothing sent stays empty", () =>
+    assert.deepEqual(mergePosted({}, {}), { postedAt: null, postedAtSource: null, reposted: false })],
+  ["posted date: an offset time is stored in UTC", () =>
+    assert.equal(mergePosted({}, { postedAt: "2026-11-12T09:00:00-05:00", postedAtSource: "listing" }).postedAt, "2026-11-12T14:00:00.000Z")],
+  ["board date: ISO text, an offset, Lever's milliseconds, and junk", () =>
+    assert.deepEqual(
+      [boardDate("2026-11-12T22:08:26.431+00:00"), boardDate("2026-10-05T10:00:00-04:00"), boardDate(1760000000000), boardDate(null), boardDate("junk"), boardDate({})],
+      ["2026-11-12T22:08:26.431Z", "2026-10-05T14:00:00.000Z", "2025-10-09T08:53:20.000Z", null, null, null])],
+  ["job input: the three posting fields are accepted, and none is still fine", () => {
+    assert.equal(jobInputSchema.safeParse({ ...INPUT, postedAt: "2026-11-12T14:00:00.000Z", postedAtSource: "board", reposted: true }).success, true);
+    assert.equal(jobInputSchema.safeParse(INPUT).success, true);
+  }],
+  ["job input: a date without its source, a bare day, and a far-future date are refused", () => {
+    assert.equal(jobInputSchema.safeParse({ ...INPUT, postedAt: "2026-11-12T14:00:00.000Z" }).success, false);
+    assert.equal(jobInputSchema.safeParse({ ...INPUT, postedAt: "2026-11-12", postedAtSource: "listing" }).success, false);
+    assert.equal(jobInputSchema.safeParse({ ...INPUT, postedAt: "2999-01-01T00:00:00.000Z", postedAtSource: "listing" }).success, false);
+  }],
   ["closing without a reason is refused", () => assert.equal(jobPatchSchema.safeParse({ stage: "CLOSED" }).success, false)],
   ["closing with a reason is accepted", () => assert.equal(jobPatchSchema.safeParse({ stage: "CLOSED", closedReason: "rejected" }).success, true)],
+  ["foundVia is optional, must be a web link, and is kept by the input schema", () => {
+    const post = "https://www.linkedin.com/posts/someone_hiring-activity-7260000000000000000";
+    assert.equal(jobInputSchema.parse({ ...INPUT, foundVia: post }).foundVia, post);
+    assert.equal("foundVia" in jobInputSchema.parse(INPUT), false);
+    assert.equal(jobInputSchema.safeParse({ ...INPUT, foundVia: "a post on LinkedIn" }).success, false);
+    assert.equal(jobInputSchema.safeParse({ ...INPUT, foundVia: "javascript:alert(1)" }).success, false);
+  }],
   ["a reason without CLOSED is refused", () => assert.equal(jobPatchSchema.safeParse({ stage: "APPLIED", closedReason: "passed" }).success, false)],
   ["low fit is a reason", () => assert.equal(jobPatchSchema.safeParse({ stage: "CLOSED", closedReason: "low_fit" }).success, true)],
   ["no response is a reason", () => assert.equal(jobPatchSchema.safeParse({ stage: "CLOSED", closedReason: "no_response" }).success, true)],
