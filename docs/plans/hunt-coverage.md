@@ -2,9 +2,9 @@
 
 ## Spec
 
-*Status: approved 2026-11-13* (Mauricio asked for higher limits, the startup boards and top job sites, and "we're hiring" post searches on LinkedIn and X, then approved this spec in chat and asked for plan and build.)
+*Status: approved 2026-11-13* (The owner asked for higher limits, the startup boards and top job sites, and "we're hiring" post searches on LinkedIn and X, then approved this spec in chat and asked for plan and build.)
 
-**Problem / motivation.** Mauricio needs a job and the hunt reads too little, from too few places.
+**Problem / motivation.** The owner needs a job and the hunt reads too little, from too few places.
 
 - **Depth.** A run opens at most 40 postings across all sources, and the closed-posting check uses up to 15 of them. He has 8 saved LinkedIn queries and the limit is 6 searches, so the last two never run.
 - **Sources.** The hunt reads LinkedIn jobs, Lenny's Jobs, two remote boards and 62 company boards on Ashby, Greenhouse or Lever. It reads no startup board, no venture-fund portfolio board, no Canadian tech board, and no company whose board runs on Workday, Workable, SmartRecruiters, Recruitee or Rippling.
@@ -118,7 +118,7 @@ Judgment calls made on his behalf:
 
 ### External verification (2026-11-13)
 
-Tested in Mauricio's signed-in Chrome:
+Tested in the owner's signed-in Chrome:
 
 - LinkedIn posts search takes the date filter and the sort in the URL: `/search/results/content/?keywords=<q>&datePosted="past-24h"&sortBy="date_posted"`. Six posts loaded before scrolling, aged 2 minutes to 2 hours; one was a real opening.
 - X search works from a URL on the Latest tab: `x.com/search?q=<q>&f=live`. He is signed in. Six posts in the last day for one query; two or three were real openings.
@@ -179,8 +179,8 @@ Two changes to the spec's wording, both to avoid hiding roles nobody read:
 | `lib/jobs/schema.ts`, `lib/jobs/repo.ts`, `lib/store/jobs.ts` | Accept `foundVia`; keep the first value stored; pass it to the page | modified |
 | `app/p/[profile]/jobs/[id]/page.tsx` | Show "Found via" | modified |
 | `scripts/check-jobs.ts`, `scripts/check-store.ts` | Assert `foundVia` and the seen list | modified |
-| `data/mauricio/profile.yaml` (through `pnpm fenix set-profile`) | His `dreamCompanies` | data |
-| `data/mauricio/memory/hunt-profile.md`, `project-target-companies.md` | Canada values for the new sources; the target-company note points at the setting and the skill | data |
+| `data/<p>/profile.yaml` (through `pnpm fenix set-profile`) | His `dreamCompanies` | data |
+| `data/<p>/memory/hunt-profile.md`, `project-target-companies.md` | Canada values for the new sources; the target-company note points at the setting and the skill | data |
 | `docs/learnings/`, `docs/architecture.md`, `CLAUDE.md` | Today's findings; the scanner, `check:hunt`, the hunt route | modified |
 
 ### Tasks
@@ -200,7 +200,7 @@ Two changes to the spec's wording, both to avoid hiding roles nobody read:
 13. **The skill: limits and script sources.** In `SKILL.md`: the new limits table; LinkedIn runs every saved query, 4 pages of 25, cards triaged before opening, newest first; the scanner command with `--profile`; how to judge and save a scanner role (from the company's own posting; a feed role with no company link is found on the company's board or site first; a Himalayas or YC page is never the saved URL); marking each judged role seen. *Verify:* criteria 7 and 12 each map to a quoted line in the skill; `grep` finds no remaining "≤ 40" or "≤ 6 LinkedIn". *Commit.*
 14. **The skill: browser steps.** Google and Meta step; post searches on LinkedIn and X (URLs, limits, what counts, read-only rule, `foundVia`, marking posts seen); the browser boards that passed task 2; the fresh pass; the report (per source: read, kept, merged, hidden as seen, capped, failed; per new job: which source found it; posts with no posting behind them). *Verify:* criteria 8, 9 and 10 each map to a quoted line in the skill. *Commit.*
 15. **Docs and memory.** Learnings (LinkedIn sort and paging, post search, X search, each board's quirks), `hunt-profile.md`, `project-target-companies.md`, `docs/architecture.md`, `CLAUDE.md`. *Verify:* `pnpm check:data`, `check:public`, `lint`, `tsc --noEmit`, `check:store`, `check:jobs`, `check:hunt` all pass. *Commit.*
-16. **A real fresh pass for Mauricio.** Run it as the skill says: scanner, LinkedIn past 24 hours, post searches on LinkedIn and X, at most 30 postings opened, jobs saved, report. *Verify:* criteria 1, 2, 8, 10 and 11 observed (a saved job from a new source shows on the board); anything the skill got wrong is fixed in the skill.
+16. **A real fresh pass for the owner.** Run it as the skill says: scanner, LinkedIn past 24 hours, post searches on LinkedIn and X, at most 30 postings opened, jobs saved, report. *Verify:* criteria 1, 2, 8, 10 and 11 observed (a saved job from a new source shows on the board); anything the skill got wrong is fixed in the skill.
 17. **Google and Meta observed.** Run that one step and report the counts. *Verify:* criterion 9.
 
 ### Premises
@@ -257,3 +257,28 @@ Two agents that did not write the plan reviewed it. Verdicts, and what changed:
 - See the spec's Research notes and External verification; tasks 1 and 2 add the exact request per source.
 
 ## Status
+
+Build run 2026-11-13, in the main checkout. Another session had built `posting-recency` in the same working tree and left it uncommitted for the owner's review, so this build sits on top of it: files that only this build touched are committed; edits to files both builds touched are left uncommitted beside the other build's (listed under "final").
+
+Amendments made during the build:
+- The scanner's entry point is `scan.py`; `boards.py` is kept as a thin wrapper so `boards.py <slug>` still works. `hunt_http.py` (the only network code) was added to the file map. The posting date uses the other build's field name, `postedAt`.
+- Feed searches use a fixed list of title queries (`FEED_QUERIES` in `hunt_core.py`), not ones built from `targetTitles`, which are prose.
+- Workday uses the site's country filter when it has one (CrowdStrike) and falls back to the first 100 "product" matches when it does not (Nvidia).
+- `lib/store/validate.ts` checks `hunt/seen.yaml`, and `lib/store/profiles.ts` gives new profiles an empty `dreamCompanies` (both added to the file map).
+- Wellfound reads the two remote role pages that exist (`head-of-product`, `vp-of-product`).
+
+- done: task 1 (script probes): one trimmed sample per source in `fixtures/` (16 files); `check:public` finds no personal data in them.
+- done: task 2 (browser probes): startup.jobs works in Chrome at `?q=<title>&remote=true` (25 cards); hiring.cafe works at `?searchState=<JSON>` (77 jobs for "head of product", Canada by default); Google careers `?q="product manager"&location=Canada` showed 5 matches; Meta careers with three Canadian offices showed 2 items. No challenge on any of the four.
+- done: task 3 (split): the set of `source` + `sourceJobId` for the full watchlist is identical before and after (60 roles, 16 home matches); `pnpm check:hunt` 58/58.
+- done: task 4 (date and order): built by the other session in `boards.py` and carried into the new modules; `boards.py docker` prints `2026-11-12` for its one role; order asserted in `check:hunt`.
+- done: task 5 (counts and failures): `check:hunt` asserts the 500, 404, empty, capped and detail-capped cases and the status lines; `scan.py no-such-company-zz` prints `NOT FOUND` and exits 0.
+- done: task 6 (board types): live, one company each: Nvidia and CrowdStrike (Workday), Hugging Face (Workable), ServiceNow (SmartRecruiters), bunq (Recruitee), Rippling, Amazon Canada; each returned roles with title, location, URL, id, description and date.
+- done: task 7 (Himalayas, Getro, Wellfound): live run kept 30 Himalayas roles (pay on Mercury, Roofr, GitLab, Censys), 11 Communitech, 3 Khosla, 3 Accel, 4 General Catalyst, 2 Georgian, 1 Radical, 4 Wellfound. Himalayas answers 429 without a 3-second pause between requests.
+- done: task 8 (YC, We Work Remotely, Mind the Product): live: YC 38 read, 1 kept, 26 US-only dropped; We Work Remotely 27 read, 1 kept; Mind the Product 20 read, 0 kept (none mention Canada).
+- done: task 9 (merge): `check:hunt` asserts one row under Greenhouse for a role seen on the board and two feeds, and that two same-titled roles on one board both stay; live, Coda's role came out once with `via khosla, generalcatalyst`.
+- done: task 10 (seen list and route): `check:store` 21 passed (add, re-add, 180-day drop, malformed file refused and left alone); on a throwaway profile GET and POST returned the planned shapes, empty and extra-key bodies got 400; after `--mark-seen` of three keys the next scan hid exactly those three ("1 hidden as seen" on three source lines) and `--all` showed them again.
+- done: task 11 (dream companies): set for the owner (8 entries); the scan then kept 22 Anthropic and 25 OpenAI roles marked `dream` where the Director-and-up filter keeps a handful; `check:store` and `check:data` pass.
+- done: task 12 (found via): `check:jobs` 78/78 including the new case; on a throwaway profile the first `foundVia` survived a second save with a different link and a third with none, a non-link got 400, and the job page rendered "Found via x.com" as a link.
+- done: tasks 13 and 14 (skill): criterion 7 ↔ "**every** query in `settings.queries`, ≤ 4 result pages each (100 cards)" and "Postings opened in the browser (all sources) ≤ 100"; criterion 8 ↔ "Hiring-post searches: 4 on LinkedIn, 4 on X" and "Never like, reply, repost, follow, connect or message"; criterion 9 ↔ "Report the count for each even when it is zero"; criterion 10 ↔ the Fresh pass column (≤ 30); criterion 12 ↔ "so these two do not depend on anyone remembering them" and the `dreamCompanies` paragraph. No "≤ 40" or "≤ 6 LinkedIn" remains.
+- done: task 15 (docs and memory): `lint`, `tsc --noEmit`, `check:store`, `check:jobs`, `check:hunt`, `check:data`, `check:public`, `check:liveness` all exit 0.
+- done: task 17 (Google and Meta observed, criterion 9): Google 5 matches for "product manager" in Canada, none a product role; Meta 2 items in its Canadian offices, neither a product role.

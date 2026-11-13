@@ -5,3 +5,4 @@ Lessons about the job-hunt workflow that help anyone running Fenix. Personal fac
 - [LinkedIn](linkedin.md)
 - [Claude in Chrome](claude-in-chrome.md)
 - [Job boards and application forms](job-boards.md)
+- [X (Twitter)](x.md)
