@@ -17,3 +17,11 @@ The job id is the 10-digit number inside each card's `componentkey` attribute (`
 ## Profile editors won't switch tabs with unsaved edits
 
 On a company page or profile editor with several tabs, LinkedIn keeps you on the current tab until its edits are saved. Save each tab before moving to the next.
+
+## Easy Apply: résumé upload has no file input until clicked
+
+The dialog is a `<dialog open>` element; "Upload resume" creates its `input[type=file]` only on click and opens the OS picker. Before clicking, override `HTMLInputElement.prototype.click` so a file input appends itself to the dialog (with an `aria-label`) and returns without opening the picker; then `find` that label and use `file_upload` on it. The page shows "Resume uploaded successfully" and selects the new file.
+
+## Easy Apply: typed text can drop characters
+
+Typing a long message into the top-choice textarea with `computer type` lost letters ("workflws", "ira"). Set long text with `form_input` and read the value back. Ticking "Mark job as a top choice" makes a 20–400 character message required.
