@@ -72,3 +72,16 @@ Ladders does the same ("For our client, we are seeking…", a shortened descript
 
 - Google: `google.com/about/careers/applications/jobs/results?q="product manager"&location=Canada` returns a count ("5 jobs matched") and role titles in `h3` elements. A plain `q=product` matches 46 roles, mostly sales and engineering.
 - Meta: `metacareers.com/jobsearch/?q=product manager&offices[0]=Toronto, ON&offices[1]=Montreal, Canada&offices[2]=Remote, Canada` keeps the offices in the address and shows "N Items".
+
+## Autodesk (jobs.autodesk.com): consent pop-up on upload, and the dropdowns ignore Enter
+
+Seen 2026-11-14. LinkedIn's Apply link lands on `jobs.autodesk.com/careers/job/<id>`; the form at `/careers/apply?pid=<id>` needs no account.
+- Attaching the CV opens a "Data Privacy Agreement" pop-up (it also covers job recommendations by email). The upload only completes after "I Agree", which is the person's click. Attach the CV first, hand over for that click, then fill the rest.
+- After the click, the parser fills email, name, phone, country, state and city. The phone shows as country code "(+1 514) Canada" plus the last seven digits, which is the right number.
+- The Yes/No dropdowns do not select on Enter after typing. Open each one and click the option.
+- "Save my answers for future applications" is ticked by default.
+- Left for the person: the four voluntary disclosures, the Mutual Arbitration Agreement "Yes" (required, marked US roles only), and the Code of Business Conduct acknowledgement.
+
+## Nubank's board is on Ashby
+
+`boards.greenhouse.io/nubank` answers with no openings; the live board is `jobs.ashbyhq.com/nubank` (2026-11-14). Product manager roles are mostly not listed there; recruiters source for them directly.
