@@ -43,3 +43,7 @@ Tested on `/jobs/search-results/` on 2026-11-13:
 Scrolling the results page did not load more than the first 6 to 12 posts, and the page's HTML carries no post address (no `urn:li:activity` ids), so a post can be identified by its author and opening words but not linked without opening its menu.
 
 `javascript_tool` returns "[BLOCKED: Cookie/query string data]" when the result contains a full address with a query string, such as `location.href` on this page. Return the text, hosts or paths instead.
+
+## Page scripts can't carry state between result pages
+
+On the job-search pages (2026-11-13), `eval` is blocked by the content security policy, and `sessionStorage` and `window.name` both come back empty after each navigation, so a script can't keep a list of ids already seen from one page to the next. Paste the whole extraction script into every page and dedupe afterwards. Writing the rows into a `<pre>` and reading it with `get_page_text` avoids the 1,000-character limit on script output. LinkedIn did not add the saved salary filter (`f_SAL`) to any US search on this run.
