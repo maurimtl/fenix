@@ -23,6 +23,9 @@ function moveStage(d: JobRecord, stage: JobStage, by: StageSetBy, at: string): v
   d.stageHistory = [...d.stageHistory, { stage, at, by }];
 }
 
+/** Stages in which the person has not applied yet. */
+const PRE_APPLY_STAGES: string[] = ["FOUND", "SHORTLISTED", "CV_READY", "FILTERED_OUT"];
+
 // Lookup and write happen under the profile lock, so two callers posting the same job make one file.
 export async function upsertJob(profile: string, input: JobInput) {
   const settings = await getSettings(profile);
@@ -67,7 +70,9 @@ export async function upsertJob(profile: string, input: JobInput) {
     // A new body sent without a format is plain text; the old body's "md" must not outlive it.
     if (jdText != null && facts.jdFormat == null) d.jdFormat = undefined;
     if (facts.jdFormat == null) delete facts.jdFormat;
-    Object.assign(d, facts, posted, { baseMaxUsd: c.baseMaxUsd, compSource: c.compSource, needsCheck: c.needsCheck, lastSeenAt: now, updatedAt: now });
+    // An old posting is a reason to look before applying; once the person has applied it is no longer a check.
+    const needsCheck = PRE_APPLY_STAGES.includes(d.stage) ? c.needsCheck : c.needsCheck.filter((n) => n !== "stale");
+    Object.assign(d, facts, posted, { baseMaxUsd: c.baseMaxUsd, compSource: c.compSource, needsCheck, lastSeenAt: now, updatedAt: now });
     if (reclassify) {
       moveStage(d, c.stage, "agent", now);
       d.filterReason = c.filterReason;

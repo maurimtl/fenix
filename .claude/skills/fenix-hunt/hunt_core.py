@@ -126,6 +126,45 @@ class _Markdown(HTMLParser):
         self.cur.append(re.sub(r"(?<![^\W_])_|_(?![^\W_])", r"\\_", data))
 
 
+_TYPED_BULLET = re.compile(r"^[-•·*–]\s+(?=\S)")
+_SENTENCE_END = re.compile(r"[.!?,;…]$")
+
+
+def plain_to_md(text):
+    """A posting saved as plain text with line breaks, as light Markdown, without changing a word: typed bullets become
+    bullets, and a short line that reads as a title a heading (at most 8 words, starts with a capital, no sentence ending,
+    no "Label: value", no digits, and something after it)."""
+    lines = [l.strip() for l in (text or "").replace("\r", "").split("\n") if l.strip()]
+    kinds = []
+    for i, line in enumerate(lines):
+        if _TYPED_BULLET.match(line):
+            kinds.append("bullet")
+        elif (i + 1 < len(lines) and len(line) <= 60 and len(line.split()) <= 8 and line[0].isalpha() and line[0].isupper()
+              and not _SENTENCE_END.search(line) and ": " not in line and not re.search(r"\d", line)):
+            kinds.append("title")
+        else:
+            kinds.append("text")
+    # Three or more title-like lines in a row are a title and its list (benefits, skills), not a stack of headings.
+    i = 0
+    while i < len(kinds):
+        j = i
+        while j < len(kinds) and kinds[j] == "title":
+            j += 1
+        if j - i >= 3:
+            kinds[i + 1:j] = ["item"] * (j - i - 1)
+        i = max(j, i + 1)
+    parts, in_list = [], False
+    for line, kind in zip(lines, kinds):
+        listed = kind in ("bullet", "item")
+        if listed:
+            body = line[_TYPED_BULLET.match(line).end():] if kind == "bullet" else line
+            parts.append(("" if in_list else "<ul>") + f"<li>{html.escape(body)}</li>")
+        else:
+            parts.append(("</ul>" if in_list else "") + (f"<h3>{html.escape(line.rstrip(':'))}</h3>" if kind == "title" else f"<p>{html.escape(line)}</p>"))
+        in_list = listed
+    return html_to_md("".join(parts) + ("</ul>" if in_list else ""))
+
+
 def html_to_md(text):
     """A posting's HTML as light Markdown, cut to what Fenix stores. Plain text with no tags comes back as one paragraph."""
     parser = _Markdown()

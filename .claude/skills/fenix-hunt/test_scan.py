@@ -390,6 +390,28 @@ with tempfile.TemporaryDirectory() as tmp:
     except post_job.Refused as e:
         check("post_job: a key the file does not have", ("ashby:nope is not in" in str(e), "boards.py" in str(e)), (True, True))
 
+# --- plain text with line breaks as light Markdown ---
+pm = hunt_core.plain_to_md
+check("plain: titles, paragraphs and typed bullets",
+      pm("About the role\nYou will lead growth. It is a big job.\n\nWhat you'll do:\n- Own the roadmap\n• Coach the team\n\nApply by Friday."),
+      "## About the role\n\nYou will lead growth. It is a big job.\n\n## What you'll do\n\n- Own the roadmap\n- Coach the team\n\nApply by Friday.")
+check("plain: a short last line, a sentence and a pay line are not titles",
+      pm("We are hiring.\n$200k-$250k base\nremote in Canada\nThanks"), "We are hiring.\n\n$200k-$250k base\n\nremote in Canada\n\nThanks")
+check("plain: the posting's own markup characters stay text", pm("Stack\nWe use C# and *nix, with [internal] tools.\n# of reports: 5"),
+      "## Stack\n\nWe use C# and \\*nix, with \\[internal\\] tools.\n\n\\# of reports: 5")
+check("plain: 'Label: value' lines and lines with numbers are not titles",
+      pm("Company: Solen Software Group\nHiring Maximum: $294100\nJob Requisition ID # 26WD101063\nResponsibilities:\nLead the team."),
+      "Company: Solen Software Group\n\nHiring Maximum: $294100\n\nJob Requisition ID # 26WD101063\n\n## Responsibilities\n\nLead the team.")
+check("plain: a title followed by short unmarked lines is a title and its list",
+      pm("Benefits\nRemote friendly\nFlexible hours\nGreat team\nWe look forward to hearing from you."),
+      "## Benefits\n\n- Remote friendly\n- Flexible hours\n- Great team\n\nWe look forward to hearing from you.")
+check("plain: two titles in a row stay titles", pm("Key Responsibilities\nPortfolio Operating Model\nOperate the portfolio against its targets."),
+      "## Key Responsibilities\n\n## Portfolio Operating Model\n\nOperate the portfolio against its targets.")
+check("plain: one line, and nothing", [pm("Just one line of text."), pm(""), pm(None)], ["Just one line of text.", "", ""])
+letters = lambda s: re.sub(r"[^a-z0-9]", "", s.lower())
+sample = "About us\nWe build things & ship <fast>.\nWhat you'll do\n- One\n- Two: three\nNotes\nLast line here."
+check("plain: no letter or digit is added or lost", letters(pm(sample)), letters(sample))
+
 failed = [c for c in checks if not c[1]]
 for name, _, got, want in failed:
     print(f"FAIL {name}\n   got  {got!r}\n   want {want!r}")
