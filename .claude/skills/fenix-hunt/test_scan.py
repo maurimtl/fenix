@@ -260,6 +260,51 @@ check("role: no posting, no format", (a["jd"], a["jdFormat"]), ("", None))
 merged, _ = hunt_core.merge([a, b])
 check("merge carries the posting and its format", (len(merged), merged[0]["jd"], merged[0]["jdFormat"]), (1, "## Feed copy", "md"))
 
+# --- detail boards: the posting as Markdown from the detail answer, and one role fetched on its own ---
+real_fetch = hunt_ats.fetch_json
+
+
+def detailed(board, answer, extra=None):
+    hunt_ats.fetch_json = lambda *a, **k: answer
+    try:
+        r = hunt_core.role(board, "1", "co", "Head of Product", "u")
+        r["path"] = "/job/x"
+        hunt_ats.BOARDS[board][1](r, "co", extra)
+        return r
+    finally:
+        hunt_ats.fetch_json = real_fetch
+
+
+r = detailed("workable", load("workable_detail.json"))
+check("workable detail: requirements and benefits get headings",
+      (r["jdFormat"], [l for l in r["jd"].split("\n") if l.startswith("## ")][:2], "<" in r["jd"]),
+      ("md", ["## Requirements", "## Benefits"], False))
+r = detailed("smartrecruiters", load("smartrecruiters_detail.json"))
+check("smartrecruiters detail: each section is titled",
+      (r["jdFormat"], r["jd"].startswith("## Company Description\n\n"), "\n\n## Job Description\n\n" in r["jd"], "\n\n## Qualifications\n\n" in r["jd"]),
+      ("md", True, True, True))
+r = detailed("workday", load("workday_detail.json"), "wd5/Site")
+check("workday detail", (r["jdFormat"], r["jd"].startswith("Ready to drive transformation in AI models?"), "<" in r["jd"]), ("md", True, False))
+r = detailed("rippling", load("rippling_detail.json"))
+check("rippling detail: a description cut inside a tag gives no posting rather than tag source", (r["jd"], r["jdFormat"]), ("", None))
+r = detailed("rippling", {"description": {"company": "<div><h2>About</h2><p>We ship.</p></div>", "role": "<ul><li>Lead</li></ul>"}})
+check("rippling detail: company and role parts", (r["jd"], r["jdFormat"]), ("## About\n\nWe ship.\n\n- Lead", "md"))
+
+calls = []
+hunt_ats.fetch_json = lambda url, *a, **k: calls.append(url) or {"description": "<p>Whole posting</p>"}
+try:
+    late = hunt_core.role("workable", "abc", "co", "Head of Product", "u")
+    late["board"] = ["workable", "co", None]
+    hunt_ats.fetch_detail(late)
+    check("fetch_detail: one request fills a role the cap left empty", (late["jd"], late["jdFormat"], len(calls)), ("Whole posting", "md", 1))
+    try:
+        hunt_ats.fetch_detail(hunt_core.role("ashby", "1", "co", "Head of Product", "u"))
+        check("fetch_detail: a list-call board has nothing to fetch", "no error", "FetchError")
+    except FetchError as e:
+        check("fetch_detail: a list-call board has nothing to fetch", "carry their description already" in str(e), True)
+finally:
+    hunt_ats.fetch_json = real_fetch
+
 failed = [c for c in checks if not c[1]]
 for name, _, got, want in failed:
     print(f"FAIL {name}\n   got  {got!r}\n   want {want!r}")

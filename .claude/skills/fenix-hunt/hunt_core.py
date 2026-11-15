@@ -117,7 +117,8 @@ class _Markdown(HTMLParser):
 def html_to_md(text):
     """A posting's HTML as light Markdown, cut to what Fenix stores. Plain text with no tags comes back as one paragraph."""
     parser = _Markdown()
-    parser.feed(text or "")
+    # A description cut off inside a tag would otherwise end with that tag's source as text.
+    parser.feed(re.sub(r"<[^>]*$", "", text or ""))
     parser.close()
     parser.flush()
     return re.sub(r"\n{3,}", "\n\n", "\n".join(parser.out)).strip()[:JD_MAX]

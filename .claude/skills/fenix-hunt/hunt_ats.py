@@ -88,6 +88,12 @@ def recruitee(slug, extra, ctx):
     return parse_recruitee(fetch_json(f"https://{slug}.recruitee.com/api/offers/"), slug), False
 
 
+def set_jd(r, posting_html):
+    """The posting as saved, from a detail answer."""
+    r["jd"] = html_to_md(posting_html)
+    r["jdFormat"] = "md" if r["jd"] else None
+
+
 # --- Workable: list, then one request per kept role for the description ---
 
 def parse_workable(d, slug):
@@ -109,6 +115,7 @@ def workable(slug, extra, ctx):
 def workable_detail(r, slug, extra):
     d = fetch_json(f"https://apply.workable.com/api/v2/accounts/{slug}/jobs/{r['sourceJobId']}")
     r["text"] = strip_html(" ".join(d.get(k) or "" for k in ("description", "requirements", "benefits")))
+    set_jd(r, (d.get("description") or "") + "".join(f"<h3>{k.title()}</h3>{d[k]}" for k in ("requirements", "benefits") if d.get(k)))
 
 
 # --- SmartRecruiters ---
@@ -137,7 +144,9 @@ def smartrecruiters(slug, extra, ctx):
 def smartrecruiters_detail(r, slug, extra):
     d = fetch_json(f"https://api.smartrecruiters.com/v1/companies/{slug}/postings/{r['sourceJobId']}")
     sections = ((d.get("jobAd") or {}).get("sections") or {}).values()
+    sections = list(sections)
     r["text"] = strip_html(" ".join((s or {}).get("text") or "" for s in sections))
+    set_jd(r, "".join(f"<h3>{html.escape((s or {}).get('title') or '')}</h3>{(s or {}).get('text') or ''}" for s in sections))
     r["url"] = d.get("postingUrl") or r["url"]
 
 
@@ -165,6 +174,7 @@ def rippling(slug, extra, ctx):
 def rippling_detail(r, slug, extra):
     d = fetch_json(f"https://ats.rippling.com/api/v2/board/{slug}/jobs/{r['sourceJobId']}")
     r["text"] = strip_html(" ".join((d.get("description") or {}).values()))
+    set_jd(r, "".join(v or "" for v in (d.get("description") or {}).values()))
     r["postedAt"] = iso(d.get("createdOn"))
 
 
@@ -225,6 +235,7 @@ def workday_detail(r, slug, extra):
     host, site = workday_base(slug, extra)
     d = (fetch_json(f"{host}/wday/cxs/{slug}/{site}{r.pop('path')}") or {}).get("jobPostingInfo") or {}
     r["text"] = strip_html(d.get("jobDescription"))
+    set_jd(r, d.get("jobDescription"))
     r["loc"] = "; ".join(filter(None, [d.get("location"), *(d.get("additionalLocations") or [])])) or r["loc"]
     r["postedAt"] = iso(d.get("startDate")) or r["postedAt"]
 
@@ -295,16 +306,27 @@ def scan_company(slug, board, extra, ctx, keep):
         kept = [j for j in jobs if keep(j["title"])]
         if detail:
             res["details_capped"] = len(kept) > MAX_DETAILS
+            for j in kept:
+                # Enough to ask for this one role's description later (fetch_detail), for roles past the cap.
+                j["board"] = [name, slug, extra]
             for j in kept[:MAX_DETAILS]:
                 try:
                     detail(j, slug, extra)
                 except (FetchError, KeyError, TypeError, AttributeError, ValueError):
                     pass
-            for j in kept:
-                j.pop("path", None)
         res.update(board=name, status="ok", read=len(jobs), roles=kept, capped=capped)
         return res
     # A 429 or 5xx while guessing is a board that did not answer, not a company without a board.
     if errors and any(not e.split()[1].startswith(("400", "403", "410")) for e in errors):
         res.update(status="failed", reason="; ".join(errors))
     return res
+
+
+def fetch_detail(r):
+    """Fill in the description of one role that the scan left without one (it was past the detail cap). One request."""
+    name, slug, extra = r.get("board") or (None, None, None)
+    detail = BOARDS.get(name, (None, None))[1]
+    if not detail:
+        raise FetchError(0, f"{r.get('source')} roles carry their description already; nothing to fetch")
+    detail(r, slug, extra)
+
