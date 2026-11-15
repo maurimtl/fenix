@@ -42,7 +42,7 @@ One Fenix profile per run, `<p>` below (a folder in `data/`). If there's only on
 | Postings opened in the browser (all sources) | ≤ 100 | ≤ 30 |
 | Company-site visits | ≤ 30 | ≤ 10 |
 | Similar jobs on LinkedIn | ≤ 10 source postings, the "More jobs" block of each; the pages opened count toward the row above | skipped |
-| Hiring-post searches | 4 on LinkedIn, 4 on X, about 30 posts read in each | the same |
+| Hiring-post searches | 5 on LinkedIn, 5 on X, about 30 posts read in each | the same |
 | Lenny's Jobs, each remote-job board, startup.jobs, hiring.cafe | 1 pass each | skipped |
 | Google and Meta careers | 1 page each | skipped |
 | LinkedIn closed-posting checks | ≤ 15, counted separately from the 100 | skipped |
@@ -141,13 +141,13 @@ Founders and hiring managers post "we're hiring" with a link to the job, often b
 
 - **LinkedIn posts:** `https://www.linkedin.com/search/results/content/?keywords=<q>&datePosted="past-24h"&sortBy="date_posted"` (the quotes around the two values are part of the address). Posts load about six at a time; scroll to load more, up to about 30.
 - **X:** `https://x.com/search?q=<q>&f=live` (the Latest tab). Check first that the signed-in account is the person's; if X shows a sign-in page, skip X and say so. Add `-filter:replies` to the query.
-- **Queries (4 per site):** pair a hiring phrase with the person's target titles, for example `"we're hiring" "head of product"`, `"hiring a" "VP product"`, `"hiring" "head of growth"`, `"hiring" "AI transformation"`. On X one query can hold the alternatives: `("we're hiring" OR "hiring a") ("head of product" OR "VP product" OR "head of growth")`.
+- **Queries (5 per site):** pair a hiring phrase with the person's target titles, for example `"we're hiring" "head of product"`, `"hiring a" "VP product"`, `"hiring" "head of growth"`, `"hiring" "AI transformation"`. On X one query can hold the alternatives: `("we're hiring" OR "hiring a") ("head of product" OR "VP product" OR "head of growth")`. When `targetTitles` include senior PM roles at AI companies, the fifth query is for those: `"hiring" "product manager" (agents OR AI)` on LinkedIn, and `("we're hiring" OR "hiring a") ("senior product manager" OR "staff product manager" OR "member of product staff") (AI OR agents) -filter:replies` on X.
 - `javascript_tool` refuses to return text that contains a full address with a query string. Return post text, the author, the age and link hosts, not `location.href`.
-- **A post counts** when it names a role that fits the target titles and comes from the company or someone who works there. Most posts do not (people announcing their own new job, newsletters, recruiters' lists): skip them.
+- **A post counts** when it names a role that fits the target titles and comes from the company or someone who works there. A Senior, Staff, Principal or Group PM or Member of Product Staff role counts only at an AI company (one in `watchlist-ai.txt`, a dream company, or a company whose product is AI); add a new one that fits to `watchlist-ai.txt` and `docs/ai-companies.md`. Most posts do not (people announcing their own new job, newsletters, recruiters' lists): skip them.
 - **For a post that counts:** follow its link to the company's own posting (a `lnkd.in` link redirects there; a LinkedIn post that embeds a job card names the job directly), judge it like any job, and save it from that posting with `foundVia` set to the post's address.
 - **Post addresses.** On X the address is the `time` element's link (`https://x.com/<user>/status/<id>`). LinkedIn's search page does not expose a post's address in the page; get it only for a post you are saving (the post's menu has "Copy link to post"), and otherwise identify the post as `linkedin:<author>:<first 40 characters>`.
 - **Mark every post you judged**, fitting or not: `scan.py --profile <p> --mark-seen "post:<address or identity>"`, and skip posts already in the seen list (`GET /api/p/<p>/hunt` lists them).
-- **Pre-filter in the page.** Most results are noise, so have the script return only posts whose text has a hiring phrase and a senior product, growth or AI title, and that do not start with someone announcing their own new job. On the first real run (2026-11-13) 33 LinkedIn posts and about 50 X posts gave no role that fit; expect most runs to add nothing, and report that plainly.
+- **Pre-filter in the page.** Most results are noise, so have the script return only posts whose text has a hiring phrase and a senior product, growth or AI title (for the fifth query also Senior, Staff, Principal or Group Product Manager and Member of Product Staff), and that do not start with someone announcing their own new job. On the first real run (2026-11-13) 33 LinkedIn posts and about 50 X posts gave no role that fit; expect most runs to add nothing, and report that plainly.
 - **A post with no posting behind it** ("DM me", "send me a note"): save nothing. List it in the report with the author, the company, the role and the post's address, so the person can reach out.
 - Never like, reply, repost, follow, connect or message.
 
