@@ -3,7 +3,7 @@
   python3 post_job.py --profile <p> --key <source:id> --json '<fields>' [--from scan.json] [--dry-run]
 
 The role's facts and its whole posting come from the scan file (scan.py's or boards.py's $OUT); `--json` adds what the
-session judged: company (the display name), compMin, compMax, currency, compSource, compEvidence, remoteVerdict,
+session judged: company (the display name, required), compMin, compMax, currency, compSource, compEvidence, remoteVerdict,
 remoteEvidence, fitScore, whyGood, redFlags, jdSummary. Fields in `--json` win over the scan file's."""
 import argparse, json, sys, urllib.error, urllib.request
 from pathlib import Path
@@ -12,7 +12,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 import hunt_ats
 from hunt_http import FetchError
 
-REQUIRED = ("compSource", "remoteVerdict")
+REQUIRED = ("company", "compSource", "remoteVerdict")
+DEFAULT_FILES = (".scratch/hunt/scan.json", ".scratch/hunt/boards.json")
 # Amazon roles are stored under the company's own site, with the number in the key as the id.
 SAVED_SOURCE = {"amazon": "company_site"}
 
@@ -22,16 +23,16 @@ class Refused(Exception):
 
 
 def find_role(key, files):
-    for name in files:
-        path = Path(name)
-        if not path.exists():
-            continue
-        for r in json.loads(path.read_text()):
+    found = [name for name in files if Path(name).exists()]
+    if not found:
+        raise Refused(f"no scan file to read: {', '.join(files)} not found from {Path.cwd()}. Pass the file scan.py or boards.py "
+                      f"wrote with `--from`.")
+    for name in found:
+        for r in json.loads(Path(name).read_text()):
             if f"{r.get('source')}:{r.get('sourceJobId')}" == key:
                 return r
-    looked = ", ".join(files)
-    raise Refused(f"{key} is not in {looked}. A full scan leaves out roles already marked seen; look the company up with "
-                  f"`python3 boards.py <company>` and retry with `--from boards.json`.")
+    raise Refused(f"{key} is not in {', '.join(found)}. A full scan leaves out roles already marked seen; look the company up with "
+                  f"`OUT=.scratch/hunt/boards.json python3 boards.py <company>` and retry with `--from .scratch/hunt/boards.json`.")
 
 
 def build_body(role, fields, detail=hunt_ats.fetch_detail):
@@ -48,8 +49,9 @@ def build_body(role, fields, detail=hunt_ats.fetch_detail):
         raise Refused("the scan file has no description for this role; a saved posting is the whole text or nothing.")
     if jd.startswith("(Excerpt"):
         raise Refused("the description is an excerpt; a saved posting is the whole text or nothing.")
+    # No company here: the scan has the board's slug, and the display name must come from the session.
     body = {"source": SAVED_SOURCE.get(role["source"], role["source"]), "sourceJobId": role["sourceJobId"], "url": role["url"],
-            "company": role["company"], "title": role["title"], "jdText": jd}
+            "title": role["title"], "jdText": jd}
     if role.get("jdFormat"):
         body["jdFormat"] = role["jdFormat"]
     if role.get("loc"):
@@ -80,7 +82,8 @@ def main(argv=None):
     ap.add_argument("--profile", required=True)
     ap.add_argument("--key", required=True, help="source:id as the scan prints it")
     ap.add_argument("--json", default="{}", dest="fields", help="the judgment fields, as a JSON object")
-    ap.add_argument("--from", dest="files", action="append", help="scan file to read (default: scan.json, then boards.json)")
+    ap.add_argument("--from", dest="files", action="append",
+                    help="scan file to read (default: .scratch/hunt/scan.json, then .scratch/hunt/boards.json)")
     ap.add_argument("--base", default="http://localhost:3007")
     ap.add_argument("--dry-run", action="store_true", help="print the body and post nothing")
     a = ap.parse_args(argv)
@@ -88,7 +91,7 @@ def main(argv=None):
         fields = json.loads(a.fields)
         if not isinstance(fields, dict):
             raise Refused("--json must be a JSON object")
-        body = build_body(find_role(a.key, a.files or ["scan.json", "boards.json"]), fields)
+        body = build_body(find_role(a.key, a.files or list(DEFAULT_FILES)), fields)
         if a.dry_run:
             print(json.dumps(body, indent=1, ensure_ascii=False))
             return 0

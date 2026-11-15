@@ -64,6 +64,9 @@ export async function upsertJob(profile: string, input: JobInput) {
     // The first place a role was found stays; a later save from another source does not replace or clear it.
     if (d.foundVia) delete facts.foundVia;
     const reclassify = d.stageSetBy === "agent" && AGENT_STAGES.includes(d.stage);
+    // A new body sent without a format is plain text; the old body's "md" must not outlive it.
+    if (jdText != null && facts.jdFormat == null) d.jdFormat = undefined;
+    if (facts.jdFormat == null) delete facts.jdFormat;
     Object.assign(d, facts, posted, { baseMaxUsd: c.baseMaxUsd, compSource: c.compSource, needsCheck: c.needsCheck, lastSeenAt: now, updatedAt: now });
     if (reclassify) {
       moveStage(d, c.stage, "agent", now);

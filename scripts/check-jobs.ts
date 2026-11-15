@@ -269,6 +269,13 @@ const extra: [string, () => void][] = [
       { label: "Domain gap", text: "sécurité, not in his record" },
     ])],
   ["fit notes: empty text gives no items", () => assert.deepEqual(parseNotes("  \n "), [])],
+  ["fit notes: two paragraphs of prose stay as written", () =>
+    assert.deepEqual(parseNotes("He led growth at two SaaS companies.\n\nThe role owns activation."), [
+      { label: null, text: "He led growth at two SaaS companies.\n\nThe role owns activation." },
+    ])],
+  ["fit notes: prose with one early colon among three lines stays prose", () =>
+    assert.equal(parseNotes("Note: the band is for the US.\nA Canadian offer may be lower.\nPosted six weeks ago.").length, 1)],
+  ["role summary: one unlabelled line is still an item", () => assert.deepEqual(summaryItems("Leads the growth team"), [{ label: null, text: "Leads the growth team" }])],
   ["role summary: eight lines show six", () =>
     assert.deepEqual(summaryItems("a\nb\nc\nd\ne\nf\ng\nh").map((i) => i.text), ["a", "b", "c", "d", "e", "f"])],
   ["save schema keeps the role summary and the body format", () => {

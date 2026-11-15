@@ -3,7 +3,7 @@ description or date, a detail step that is run only for roles that passed the ti
 
 A lister returns (roles, capped). A missing board raises FetchError with status 404."""
 import html, re
-from hunt_core import ISO3, html_to_md, iso, iso_ago, iso_from, money, role, strip_html
+from hunt_core import ISO3, fill_jd, html_to_md, iso, iso_ago, iso_from, money, role, strip_html
 from hunt_http import FetchError, fetch_json
 
 MAX_PAGES = 5
@@ -19,9 +19,8 @@ def parse_ashby(d, slug):
         out.append(role("ashby", j["id"], slug, j["title"], j.get("jobUrl"), "; ".join(filter(None, locs)), j.get("isRemote"),
                         (j.get("compensation") or {}).get("compensationTierSummary"), iso(j.get("publishedAt")),
                         j.get("descriptionPlain", ""),
-                        # Older answers carry only the plain text, which is saved as it is.
-                        jd=html_to_md(j.get("descriptionHtml")) or j.get("descriptionPlain", ""),
-                        jd_md=bool(j.get("descriptionHtml"))))
+                        # The plain text is what is saved when the HTML is missing or gives nothing.
+                        jd=j.get("descriptionPlain", ""), jd_md=False, jd_html=j.get("descriptionHtml")))
     return out
 
 
@@ -33,7 +32,7 @@ def parse_greenhouse(d, slug):
         out.append(role("greenhouse", j["id"], slug, j["title"], j.get("absolute_url"), (j.get("location") or {}).get("name", ""),
                         None, pay.group(0) if pay else None, iso(j.get("first_published")), text,
                         # Greenhouse sends the posting's HTML escaped once.
-                        jd=html_to_md(html.unescape(j.get("content") or ""))))
+                        jd_html=html.unescape(j.get("content") or "")))
     return out
 
 
@@ -41,20 +40,20 @@ def parse_lever(d, slug):
     out = []
     for j in d if isinstance(d, list) else []:
         c = j.get("categories", {})
-        text = " ".join([j.get("descriptionPlain", ""), *(strip_html(l.get("content", "")) for l in j.get("lists", [])),
+        text = " ".join([j.get("descriptionPlain") or "", *(strip_html(l.get("content")) for l in j.get("lists") or []),
                          j.get("additionalPlain") or ""])
         s = j.get("salaryRange") or {}
         out.append(role("lever", j["id"], slug, j["text"], j.get("hostedUrl"),
                         ", ".join(c.get("allLocations") or [c.get("location") or ""]), j.get("workplaceType") == "remote",
                         money(s.get("min"), s.get("max"), s.get("currency")), iso(j.get("createdAt")), text,
-                        jd=html_to_md(lever_html(j))))
+                        jd_html=lever_html(j)))
     return out
 
 
 def lever_html(j):
     """A Lever posting's parts in page order: description, each titled list, the closing text."""
     para = lambda plain: "".join(f"<p>{html.escape(p)}</p>" for p in (plain or "").split("\n") if p.strip())
-    lists = "".join(f"<h3>{html.escape(l.get('text') or '')}</h3><ul>{l.get('content') or ''}</ul>" for l in j.get("lists", []))
+    lists = "".join(f"<h3>{html.escape(l.get('text') or '')}</h3><ul>{l.get('content') or ''}</ul>" for l in j.get("lists") or [])
     return (j.get("description") or para(j.get("descriptionPlain"))) + lists + (j.get("additional") or para(j.get("additionalPlain")))
 
 
@@ -79,8 +78,8 @@ def parse_recruitee(d, slug):
         out.append(role("recruitee", j["id"], j.get("company_name") or slug, j["title"], j.get("careers_url"), j.get("location", ""),
                         j.get("remote"), money(s.get("min"), s.get("max"), s.get("currency")), iso(j.get("published_at")),
                         strip_html(f"{j.get('description', '')} {j.get('requirements', '')}"),
-                        jd=html_to_md(f"{j.get('description') or ''}<h3>Requirements</h3>{j.get('requirements') or ''}"
-                                      if j.get("requirements") else j.get("description") or "")))
+                        jd_html=(f"{j.get('description') or ''}<h3>Requirements</h3>{j.get('requirements') or ''}"
+                                 if j.get("requirements") else j.get("description") or "")))
     return out
 
 
@@ -233,7 +232,10 @@ def workday(slug, extra, ctx):
 
 def workday_detail(r, slug, extra):
     host, site = workday_base(slug, extra)
-    d = (fetch_json(f"{host}/wday/cxs/{slug}/{site}{r.pop('path')}") or {}).get("jobPostingInfo") or {}
+    if not r.get("path"):
+        raise FetchError(0, "this Workday role has no posting path; look the company up again with boards.py")
+    d = (fetch_json(f"{host}/wday/cxs/{slug}/{site}{r['path']}") or {}).get("jobPostingInfo") or {}
+    r.pop("path")  # only once the answer is in hand, so a failed request can be retried
     r["text"] = strip_html(d.get("jobDescription"))
     set_jd(r, d.get("jobDescription"))
     r["loc"] = "; ".join(filter(None, [d.get("location"), *(d.get("additionalLocations") or [])])) or r["loc"]
@@ -252,7 +254,7 @@ def parse_amazon(d):
         text = strip_html(" ".join(j.get(k) or "" for k in ("description", "basic_qualifications", "preferred_qualifications")))
         out.append(role("amazon", j.get("id_icims") or j["id"], "Amazon", j["title"], "https://www.amazon.jobs" + j.get("job_path", ""),
                         j.get("normalized_location", ""), None, None, iso_from(j.get("posted_date"), "%B %d, %Y"), text,
-                        jd=html_to_md("".join(f"<h3>{head}</h3><p>{j.get(k)}</p>" for head, k in AMAZON_PARTS if j.get(k)))))
+                        jd_html="".join(f"<h3>{head}</h3><p>{j.get(k)}</p>" for head, k in AMAZON_PARTS if j.get(k))))
     return out
 
 
@@ -303,7 +305,8 @@ def scan_company(slug, board, extra, ctx, keep):
             return res
         if not jobs and not board:
             continue
-        kept = [j for j in jobs if keep(j["title"])]
+        # Only kept roles have their posting converted; the rest are dropped with their HTML.
+        kept = [fill_jd(j) for j in jobs if keep(j["title"])]
         if detail:
             res["details_capped"] = len(kept) > MAX_DETAILS
             for j in kept:

@@ -231,7 +231,12 @@ check("md: bullets typed as text become bullets", md("- Are 18 or older<br/>- Ha
       "- Are 18 or older\n- Has an MBA\n- Third")
 check("md: text that looks like markup stays text",
       md("<p>C# and 5* hotels, snake_case, $209,040\u2014$296,140</p><p># not a heading</p><p>> not a quote</p><p>-5% is not a bullet</p>"),
-      "C# and 5* hotels, snake_case, $209,040\u2014$296,140\n\n\\# not a heading\n\n\\> not a quote\n\n-5% is not a bullet")
+      "C# and 5\\* hotels, snake_case, $209,040\u2014$296,140\n\n\\# not a heading\n\n\\> not a quote\n\n-5% is not a bullet")
+check("md: the posting's own asterisks, brackets, backticks and word-edge underscores are text",
+      md("<p>5+ years * strong SQL, [internal] `code`, _private and __init__, foo_bar_baz</p><p>+ plus line</p><p>* typed bullet</p>"),
+      "5+ years \\* strong SQL, \\[internal\\] \\`code\\`, \\_private and \\_\\_init\\_\\_, foo_bar_baz\n\n\\+ plus line\n\n- typed bullet")
+check("md: a link label with a bracket and an address with parentheses stay one link",
+      md('<p><a href="https://example.com/a_(b)?x=1 2">Role [remote]</a></p>'), "[Role \\[remote\\]](https://example.com/a_%28b%29?x=1%202)")
 check("md: line breaks, scripts and styles", md("<style>x{}</style><p>Line one<br>Line two</p><script>hide()</script>"),
       "Line one\n\nLine two")
 check("md: links keep their address",
@@ -242,20 +247,31 @@ check("md: no tags, and nothing", [md("Just text"), md(""), md(None)], ["Just te
 check("md: cut at Fenix's limit", len(md("<p>" + "x" * 70_000 + "</p>")), 60_000)
 r = hunt_ats.parse_greenhouse({"jobs": [{"id": 1, "title": "Head of Product",
                                          "content": "&lt;h2&gt;The role&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Own it&lt;/li&gt;&lt;/ul&gt;"}]}, "x")[0]
+check("a listed role is not converted until it is kept", (r["jd"], r["jdFormat"], "jd_html" in r), ("", None, True))
+hunt_core.fill_jd(r)
+check("a kept role carries no leftover HTML", "jd_html" in r, False)
 check("greenhouse: once-escaped HTML", (r["jd"], r["jdFormat"], r["text"]), ("## The role\n\n- Own it", "md", "The role Own it"))
 r = hunt_ats.parse_ashby({"jobs": [{"id": "a", "title": "Head of Product", "descriptionPlain": "ROLE\n\n - Own it",
                                     "descriptionHtml": "<h1>Role</h1><ul><li>Own it</li></ul>"}]}, "x")[0]
+hunt_core.fill_jd(r)
 check("ashby: HTML description", (r["jd"], r["jdFormat"], r["text"]), ("## Role\n\n- Own it", "md", "ROLE\n\n - Own it"))
 r = hunt_ats.parse_ashby({"jobs": [{"id": "a", "title": "Head of Product", "descriptionPlain": "ROLE\n\n - Own it"}]}, "x")[0]
+hunt_core.fill_jd(r)
 check("ashby: plain text only is saved as plain text", (r["jd"], r["jdFormat"]), ("ROLE\n\n - Own it", None))
+r = hunt_core.fill_jd(hunt_ats.parse_ashby({"jobs": [{"id": "a", "title": "Head of Product", "descriptionPlain": "ROLE\n\n - Own it",
+                                                      "descriptionHtml": "<div> <br> </div>"}]}, "x")[0])
+check("ashby: HTML that gives nothing falls back to plain text, not Markdown", (r["jd"], r["jdFormat"]), ("ROLE\n\n - Own it", None))
 r = hunt_ats.parse_lever([{"id": "l", "text": "VP Product", "descriptionPlain": "We are hiring.\nJoin us.",
                            "lists": [{"text": "You will", "content": "<li>Lead</li><li>Ship</li>"}], "additional": "<div>Equal opportunity.</div>"}], "x")[0]
+hunt_core.fill_jd(r)
 check("lever: description, titled lists, closing text",
       r["jd"], "We are hiring.\n\nJoin us.\n\n## You will\n\n- Lead\n- Ship\n\nEqual opportunity.")
-r = hunt_ats.parse_recruitee(load("recruitee.json"), "bunq")[0]
+r = hunt_core.fill_jd(hunt_ats.parse_lever([{"id": "l", "text": "VP Product", "descriptionPlain": "We are hiring.", "lists": None}], "x")[0])
+check("lever: a posting with no lists still parses", (r["jd"], r["text"].strip()), ("We are hiring.", "We are hiring."))
+r = hunt_core.fill_jd(hunt_ats.parse_recruitee(load("recruitee.json"), "bunq")[0])
 check("recruitee: requirements get a heading and bullets",
       (r["jdFormat"], "\n\n## Requirements\n\n- " in r["jd"], "<" in r["jd"]), ("md", True, False))
-r = hunt_ats.parse_amazon(load("amazon.json"))[0]
+r = hunt_core.fill_jd(hunt_ats.parse_amazon(load("amazon.json"))[0])
 check("amazon: three titled parts with bullets",
       (r["jd"].startswith("## Description\n\n"), "\n\n## Basic qualifications\n\n- " in r["jd"], "\n\n## Preferred qualifications\n\n- " in r["jd"]),
       (True, True, True))
@@ -309,6 +325,22 @@ try:
 finally:
     hunt_ats.fetch_json = real_fetch
 
+
+def failing(*a, **k):
+    raise FetchError(503, "busy")
+
+
+wd = hunt_core.role("workday", "JR9", "co", "Director, Product", "u")
+wd["path"] = "/job/JR9"
+hunt_ats.fetch_json = failing
+try:
+    hunt_ats.workday_detail(wd, "co", "wd5/Site")
+except FetchError:
+    pass
+finally:
+    hunt_ats.fetch_json = real_fetch
+check("workday detail: a failed request keeps the path for a retry", wd.get("path"), "/job/JR9")
+
 # --- post_job: the body sent to Fenix ---
 scanned = hunt_core.role("ashby", "6f1c2a3b-0000-4000-8000-000000000001", "acme", "Head of Product", "https://jobs.ashbyhq.com/acme/6f1c",
                          "Remote - Canada", True, "$250K", "2026-11-12T15:04:05.000Z", "flat text", jd="## The role\n\n- Own it")
@@ -334,6 +366,8 @@ check("post_job: a feed role is refused", refusal(hunt_core.role("himalayas", "9
 check("post_job: no description is refused", "whole text or nothing" in refusal(hunt_core.role("ashby", "1", "x", "VP Product", "u")), True)
 check("post_job: an excerpt is refused", "is an excerpt" in refusal(hunt_core.role("ashby", "1", "x", "VP Product", "u", jd="(Excerpt.) Some of it")), True)
 check("post_job: missing judgment fields are named", refusal(dict(scanned), {"company": "Acme"}), "--json is missing compSource, remoteVerdict")
+check("post_job: the display name must come from the session, not the board's slug",
+      refusal(dict(scanned), {"compSource": "unknown", "remoteVerdict": "unclear"}), "--json is missing company")
 late = hunt_core.role("workday", "JR1", "nvidia", "Director, Product", "u")
 late["board"] = ["workday", "nvidia", "wd5/Site"]
 body = post_job.build_body(late, judged, lambda r: r.update(jd="Fetched posting", jdFormat="md"))
@@ -344,7 +378,17 @@ try:
     post_job.find_role("ashby:nope", ["no-such-file.json"])
     check("post_job: a key the file does not have", "found", "Refused")
 except post_job.Refused as e:
-    check("post_job: a key the file does not have", ("ashby:nope is not in no-such-file.json" in str(e), "boards.py" in str(e)), (True, True))
+    check("post_job: a scan file that does not exist is named", "no scan file to read: no-such-file.json not found" in str(e), True)
+import tempfile
+with tempfile.TemporaryDirectory() as tmp:
+    scan_file = Path(tmp) / "scan.json"
+    scan_file.write_text(json.dumps([scanned]))
+    check("post_job: a role is found by its key", post_job.find_role("ashby:6f1c2a3b-0000-4000-8000-000000000001", ["no-such-file.json", str(scan_file)])["title"], "Head of Product")
+    try:
+        post_job.find_role("ashby:nope", [str(scan_file)])
+        check("post_job: a key the file does not have", "found", "Refused")
+    except post_job.Refused as e:
+        check("post_job: a key the file does not have", ("ashby:nope is not in" in str(e), "boards.py" in str(e)), (True, True))
 
 failed = [c for c in checks if not c[1]]
 for name, _, got, want in failed:

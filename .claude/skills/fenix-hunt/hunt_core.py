@@ -58,13 +58,13 @@ class _Markdown(HTMLParser):
         self.cur, self.prefix, self.bold_text, self.plain_text = [], "", False, False
         if not prefix and bold_only and len(line) <= _HEADING_MAX:
             prefix, line = "## ", line.rstrip(":")
-        typed_bullet = re.match(r"[-•*]\s+(?=\S)", line) if not prefix else None
+        typed_bullet = re.match(r"(?:[-•]|\\?\*)\s+(?=\S)", line) if not prefix else None
         if typed_bullet:
             # Some boards type their bullets as text ("- item<br>"); they are bullets all the same.
             prefix, line = "- ", line[typed_bullet.end():]
         elif not prefix:
             # A line that only looks like a heading or a quote stays text.
-            line = re.sub(r"^([#>])", r"\\\1", line)
+            line = re.sub(r"^([#>+])", r"\\\1", line)
         if prefix.startswith("## ") and self.out and self.out[-1] != "":
             self.out.append("")
         self.out.append(prefix + line)
@@ -110,7 +110,8 @@ class _Markdown(HTMLParser):
             label = re.sub(r"\s+", " ", "".join(self.cur[start:])).strip()
             # A block that closed inside the link has already flushed its text; then there is nothing to wrap.
             if label and re.match(r"https?://", href) and start <= len(self.cur):
-                self.cur[start:] = [href if label == href else f"[{label}]({href})"]
+                href = href.replace("(", "%28").replace(")", "%29").replace(" ", "%20")
+                self.cur[start:] = [href if label.replace("\\", "") == href else f"[{label}]({href})"]
 
     def handle_data(self, data):
         if self.skip:
@@ -120,7 +121,9 @@ class _Markdown(HTMLParser):
                 self.bold_text = True
             else:
                 self.plain_text = True
-        self.cur.append(data)
+        # The posting's own *, `, [ ] and word-edge _ are text, not Markdown.
+        data = re.sub(r"([*`\[\]])", r"\\\1", data)
+        self.cur.append(re.sub(r"(?<![^\W_])_|_(?![^\W_])", r"\\_", data))
 
 
 def html_to_md(text):
@@ -199,11 +202,23 @@ def is_repost_link(url):
 
 
 def role(source, job_id, company, title, url, loc="", remote=None, comp=None, posted=None, text="", feed=None, jd="",
-         jd_md=True):
-    """`text` is the flattened posting the filters read; `jd` is the posting as saved (Markdown unless jd_md is False)."""
-    return dict(source=source, sourceJobId=str(job_id), company=company or "", title=title or "", loc=loc or "",
-                remote=remote, url=url, comp=comp, postedAt=posted, text=text or "", via=[feed] if feed else [],
-                dream=False, jd=(jd or "")[:JD_MAX], jdFormat="md" if jd and jd_md else None)
+         jd_md=True, jd_html=None):
+    """`text` is the flattened posting the filters read; `jd` is the posting as saved (Markdown unless jd_md is False).
+    `jd_html` is the posting's HTML, converted by fill_jd only for roles that are kept."""
+    r = dict(source=source, sourceJobId=str(job_id), company=company or "", title=title or "", loc=loc or "",
+             remote=remote, url=url, comp=comp, postedAt=posted, text=text or "", via=[feed] if feed else [],
+             dream=False, jd=(jd or "")[:JD_MAX], jdFormat="md" if jd and jd_md else None)
+    if jd_html:
+        r["jd_html"] = jd_html
+    return r
+
+
+def fill_jd(r):
+    """Turn a kept role's HTML into the Markdown posting. A role whose HTML gives nothing keeps what it had."""
+    md = html_to_md(r.pop("jd_html", None))
+    if md:
+        r["jd"], r["jdFormat"] = md, "md"
+    return r
 
 
 def key(r):
