@@ -104,18 +104,19 @@ In the report, give the similar-jobs count like any source (new / already known 
 
 It takes about two minutes and reads, without a browser:
 
-- every company board in `watchlist.txt` plus the person's `settings.watchlistExtra` (Ashby, Greenhouse, Lever, Workday, Workable, SmartRecruiters, Recruitee, Rippling);
+- every company board in `watchlist.txt` plus the person's `settings.watchlistExtra` (Ashby, Greenhouse, Lever, Workday, Workable, SmartRecruiters, Recruitee, Rippling), keeping director-level titles and up;
+- every board in `watchlist-ai.txt` (fast-growing AI companies, `docs/ai-companies.md`), which also keeps senior individual-contributor titles: Senior, Staff, Principal and Group Product Manager, and Member of Product Staff. Dream companies and a company looked up by name keep them too;
 - the person's `settings.dreamCompanies`: for these it keeps **every product or growth title at any level**, marked `dream` (for example Anthropic's and OpenAI's "Product Manager, …" roles, Nvidia on Workday, Amazon's search for the home country);
 - the feeds in `feeds.txt`: Himalayas (remote roles open to the home country, Director and Executive), Wellfound, Y Combinator, We Work Remotely, Mind the Product, Communitech and the fund portfolio boards.
 
 **Read the source lines first.** Each source prints one line: roles read, kept, dropped (another region, or a repost with the company hidden), merged into another source, hidden as seen, and whether a cap was hit. `FAILED <reason>` or `0 read` on a feed that normally returns roles means the site changed: say so in the report and note it in `docs/learnings/job-boards.md`. `NOT FOUND` on a company means it moved boards: find the new one or drop the line.
 
-**Then the role list**, newest first: `key | posted | company | title | location | home | pay | dream | via <feeds>`. Full descriptions and `postedAt` are in the JSON. Roles already marked seen are not printed (`--all` prints them).
+**Then the role list**, newest first: `key | posted | company | title | location | home | world | pay | dream | via <feeds>` (`world` appears when the posting says it hires anywhere or around the world). Full descriptions and `postedAt` are in the JSON. Roles already marked seen are not printed (`--all` prints them).
 
 Judge every printed role like a LinkedIn job, newest first:
 
 - First ask Fenix which printed roles are already stored (`GET /api/p/<p>/jobs?company=<name>`, same title): on the first run about half were, found earlier through LinkedIn. Mark those seen without re-reading them.
-- Read a role when `home=True`, when its location says remote without a country, or when it is `dream`. Skip the rest (a New York on-site role) without saving.
+- Read a role when `home=True`, when `world` is shown, when its location says remote without a country, or when it is `dream`. Skip the rest (a New York on-site role) without saving.
 - **A feed's date is when the feed saw the role, not when it was posted.** Himalayas listed Arctic Wolf, Bloom and Kepler roles as 1 November; the companies' own boards dated them September, August and May. Look the role up on the company's board before treating it as fresh.
 - **Dream roles are reported at any fit**, in their own part of the report, because the person wants to see everything at those companies.
 - **Save from the company's own posting, with `post_job.py`.** A role whose `source` is a company board (`ashby`, `greenhouse`, `lever`, `workday`, `workable`, `smartrecruiters`, `recruitee`, `rippling`, `amazon`) is saved straight from the scan file, even when a feed found it (`via`):
