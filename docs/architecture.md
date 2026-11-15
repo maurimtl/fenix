@@ -9,7 +9,7 @@ data/<person>/
   profile.yaml          name, contact, default headline and summary, settings (pay floor, where they can work, searches)
   career.yaml           companies → positions → bullets; education, skills, courses
   cvs/<name>.yaml       one CV version each, plus the PDF that was sent
-  jobs/<company-title--source-id>.md   front matter: the job's facts, stage, history, answers; body: the job description
+  jobs/<company-title--source-id>.md   front matter: the job's facts, stage, history, answers; body: the whole posting (light Markdown when `jdFormat: md`)
   stories/<slug>.md     a career story with numbers and their proof
   interviews/<date>-<company>-r<n>.md   one interview round: a brief before it, a review after it (+ .transcript.txt)
   interview-answers.md  best current answer per common question, and lines that landed (feeds tailoring and LinkedIn)
@@ -49,6 +49,10 @@ The built-ins are Plain (the default for new people), Classic, Executive, Gutter
 ## Jobs
 
 The hunt skill's scanner (`.claude/skills/fenix-hunt/scan.py`, Python standard library only) reads every job source that needs no browser: company boards and multi-company feeds, merged into one list. It gets the person's hunt settings and the roles already judged from `/api/p/<p>/hunt` (`lib/store/hunt.ts`, `data/<p>/hunt/seen.yaml`). The hunt skill posts each job to `/api/p/<p>/jobs` with the facts it read and the page's own words as evidence. `lib/jobs/` decides the stage from the person's settings: Shortlisted, Needs a check (pay or remote policy unclear) or Filtered out. A stage the person sets is never moved by a later hunt. `pnpm check:closed` asks Ashby, Greenhouse and Lever whether open jobs are still posted.
+
+A job file's body is the posting itself, whole. When the job's `jdFormat` is `md` the body is light Markdown (the posting's section titles as `## ` headings, its lists as `- ` bullets, links with their addresses) and the job page draws it as such; without the flag the body is plain text and is drawn as written. Board roles get their body from the scanner: each board parser keeps the posting both flattened (`text`, which the title and location filters read) and as Markdown (`jd`, from `html_to_md` in `hunt_core.py`), and `post_job.py` posts a role from the scan file to the save route, so the text does not pass through the session. LinkedIn postings are read in the browser by `linkedin_posting.js`, which builds the same Markdown from the page.
+
+Three text fields carry the session's judgment and are written one point per line with a short label (`Pay: …`): `whyGood`, `redFlags` and `jdSummary` (what the role owns, who it reports to, the must-haves). `lib/jobs/notes.ts` splits them into list items for the job page; a value on a single line is drawn as a paragraph, which is how jobs saved before this format look.
 
 ## The number rule
 
