@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import hunt_feeds
 from hunt_ats import scan_company
-from hunt_core import keep_title, key, merge, newest_first, resolve_posting
+from hunt_core import keep_title, key, merge, newest_first, open_world, resolve_posting
 from hunt_http import FetchError, fetch_json
 
 HERE = Path(__file__).parent
@@ -77,7 +77,7 @@ def status_line(name, s):
 def role_line(r):
     flags = "".join([" | dream" if r["dream"] else "", f" | via {', '.join(r['via'])}" if r["via"] else ""])
     return (f"   {r['key']} | {(r['postedAt'] or 'unknown')[:10]} | {r['company'][:28]} | {r['title'][:70]} | {r['loc'][:60]}"
-            f" | home={r['homeMention']} | {(r['comp'] or '')[:40]}{flags}")
+            f" | home={r['homeMention']}{' | world' if r.get('openWorld') else ''} | {(r['comp'] or '')[:40]}{flags}")
 
 
 def scan_boards(entries, dream, ctx):
@@ -156,6 +156,7 @@ def finish(roles, stats, seen, show_all, ctx):
         if s:
             s["kept"] += 1
         r["homeMention"] = bool(ctx.get("home_re") and ctx["home_re"].search(f"{r['loc']} {r['text']}"))
+        r["openWorld"] = open_world(f"{r['loc']} {r['text']}")
         shown.append(r)
     for r in shown:
         del r["origin"]

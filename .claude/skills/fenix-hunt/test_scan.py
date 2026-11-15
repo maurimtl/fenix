@@ -210,6 +210,18 @@ check("finish: merged, hidden and kept counts", (len(shown), stats["geotab"]["ke
                                                  stats["communitech"]["merged"], stats["communitech"]["hidden"]), (2, 1, 1, 1, 1))
 # The board copy takes the feed's date (Geotab's is the newer of the two), so it sorts first.
 check("finish: keys are source:id, newest first", [r["key"] for r in shown], ["greenhouse:5471107008", "communitech:98813918"])
+for text, want in [("open to hiring around the world for the right candidate", True), ("Remote: work from anywhere", True),
+                   ("candidates based anywhere in North America or Europe", True), ("We hire globally", True),
+                   ("our team is distributed worldwide", True), ("Trusted by teams worldwide", False), ("", False),
+                   ("shipping globally since 2010", False), ("Remote (US only)", False)]:
+    check(f"open_world {text!r}", hunt_core.open_world(text), want)
+world = hunt_core.role("ashby", "ba48", "runway-ml", "Member of Product Staff, Agents", "https://jobs.ashbyhq.com/runway-ml/ba48",
+                       loc="Remote; New York, NY; San Francisco, CA",
+                       text="Preferable to have someone near an office in NYC or San Francisco, but open to hiring around the world for the right candidate.")
+world["origin"] = "runway-ml"
+w = scan.finish([world], {"runway-ml": dict(status="ok", board="ashby", read=1, kept=0)}, set(), False, ctx)[0]
+check("finish: openWorld set, homeMention not", (w["openWorld"], w["homeMention"]), (True, False))
+check("role line marks world", " | world | " in scan.role_line(w), True)
 check("status lines", [scan.status_line(n, s) for n, s in [
     ("a", dict(status="notfound")), ("b", dict(status="failed", reason="500 Server Error")),
     ("c", dict(status="ok", board="lever", read=0, kept=0)),

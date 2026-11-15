@@ -7,6 +7,9 @@ SENIOR = re.compile(r"\b(director|head|s?vp|evp|vice president|chief|cpo|gm|gene
                     r"|\b(product|growth)\b.*\b(director|head|s?vp|evp|vice president|lead)\b", re.I)
 # Senior individual-contributor PM titles, kept on company boards only; feeds would flood with them.
 SENIOR_IC = re.compile(r"\b(senior|sr\.?|staff|principal|group|lead)\b.*\bproduct manager\b|\bmember of (the )?product staff\b", re.I)
+# "Open to hiring around the world": a hiring or work word, then within four words a worldwide phrase.
+OPEN_WORLD = re.compile(r"\b(hiring|hire|hires|remote|work|based|located|candidates?|distributed|team|employees)\b\W+"
+                        r"(?:[\w'-]+\W+){0,4}?(anywhere|around the world|worldwide|globally|any country)\b", re.I)
 WIDE = re.compile(r"\b(product|growth)\b", re.I)
 SKIP = re.compile(r"design|marketing|engineer|sales|account|counsel|legal|finance", re.I)
 # "product" and "growth" in a dream company's title are often not product work: Product Architect, Product Security.
@@ -28,6 +31,10 @@ def keep_title(title, wide=False, board=False):
     if SENIOR.search(title) or (board and SENIOR_IC.search(title)):
         return True
     return bool(wide and WIDE.search(title) and not WIDE_SKIP.search(title))
+
+
+def open_world(text):
+    return bool(text and OPEN_WORLD.search(text))
 
 
 def strip_html(text):
