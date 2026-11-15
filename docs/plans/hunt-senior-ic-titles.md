@@ -111,3 +111,18 @@ None.
 - No outside libraries; Python `re` only.
 
 ## Status
+
+- in-progress: task 0
+- done: task 0: baseline board scan, 143 roles (11x NOT FOUND)
+- in-progress: task 1
+- done: task 1: check:hunt 137/137 (14 new title cases), c97fee1
+- in-progress: task 2
+- done: task 2: check:hunt 148/148 (11 new cases), 2cdf59d
+- in-progress: task 3
+- done: task 3: runway-ml keeps 3 roles incl. "Member of Product Staff, Agents | world"; all boards with IC titles: 143 → 415 (+272), over the 60 rule
+- amendment (task 3 decision rule): AI boards moved to new `watchlist-ai.txt` (the 68 added today + Cohere, Writer, Gamma, Lovable, Replit, xAI, Cursor); `scan_boards(..., ic=)` keeps IC titles only for those, dream companies, and slugs looked up by name. Recount: 143 → 220 (+77, Databricks 23); Databricks moved to watchlist.txt (director-only) → about +55. One-time catch-up: later runs hide judged roles. 149/149 checks. 7e418b2
+- in-progress: task 4
+- done: task 4: SKILL.md updated; targetTitles has 4 entries (set-profile), check:data ok; hunt-profile memory updated, 2dcbbd4
+- review: 7 findings, 4 fixed (US-only "anywhere" no longer flags world; no slug in both watchlists, checked; test stub restored in finally; dated move notes removed), 3 left by decision (loose "lead … product manager" titles are rare and judged by the session; name lookups keep IC titles as the spec says; merged roles keep the board's text in practice). check:hunt 152/152, runway-ml still flagged world. 99bdf5f
+- final: 99bdf5f, 5/5 tasks done (0–4)
+- follow-up (not started): hiring-post searches on LinkedIn and X pair "hiring" with director-level titles only, so senior IC roles at AI companies never surface there either.
