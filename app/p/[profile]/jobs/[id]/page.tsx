@@ -7,6 +7,7 @@ import { promptWho } from "@/lib/start/progress";
 import { interviewsForJob } from "@/lib/store/interviews";
 import { CompGauge } from "@/components/comp-gauge";
 import { FitNotes } from "@/components/fit-notes";
+import { Markdown } from "@/components/markdown";
 import { summaryItems } from "@/lib/jobs/notes";
 import { JobStageSelect } from "@/components/job-stage-select";
 import { getJob } from "@/lib/jobs/repo";
@@ -141,7 +142,16 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
                 {job.jdText && (
                   <>
                     <p className="muted small">Saved {job.firstSeenAt.toLocaleDateString("en-CA", { month: "long", day: "numeric" })}, in case the posting comes down.</p>
-                    <pre className="jd">{job.jdText}</pre>
+                    <details className="jd-wrap">
+                      <summary>Show the full posting</summary>
+                      {job.jdFormat === "md" ? (
+                        <div className="jd jd-md">
+                          <Markdown text={job.jdText} />
+                        </div>
+                      ) : (
+                        <pre className="jd">{job.jdText}</pre>
+                      )}
+                    </details>
                   </>
                 )}
               </section>
