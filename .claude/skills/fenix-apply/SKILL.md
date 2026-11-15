@@ -37,6 +37,10 @@ description: Use when someone asks to apply to a job saved in their Fenix pipeli
 8. **Hand over:** tell the person what's filled, what's left for them (consents, demographics, anything unanswered), and that the tab is ready for Submit. Leave the tab open.
 9. **After they submit:** when the person says they submitted, `PATCH /api/p/<p>/jobs/<id>` with `{"stage":"APPLIED"}`.
 
+## If you re-save the job
+
+Applying sometimes turns up facts worth storing on the job (the company's own pay band, a location that differs from the listing). When you re-post a job to `/api/p/<p>/jobs`, write `whyGood`, `redFlags` and `jdSummary` one point per line with a short label, as the fenix-hunt skill's "How to write the fit notes and the summary" describes, and never replace a stored posting with an excerpt: leave `jdText` out to keep what is stored.
+
 ## When something goes wrong
 
 - Captcha, sign-in wall, or "unusual activity": stop and tell the person. Don't retry.

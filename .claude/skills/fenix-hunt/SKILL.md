@@ -24,6 +24,7 @@ One Fenix profile per run, `<p>` below (a folder in `data/`). If there's only on
 - **No paid API calls.** All judgment (comp, remote, fit, CV drafting) happens in this session.
 - **Quote, don't paraphrase, evidence.** `compEvidence` and `remoteEvidence` are verbatim snippets from the page.
 - **Never invent** salary numbers, remote policy, or résumé achievements.
+- **A saved description is the whole posting or nothing.** Never save an excerpt, a summary in its place, or a description cut to save reading. Board roles are saved with `post_job.py`, which takes the posting from the scan file; LinkedIn postings are read in full with `linkedin_posting.js`.
 
 ## Two kinds of run
 
@@ -103,14 +104,19 @@ Judge every printed role like a LinkedIn job, newest first:
 - Read a role when `home=True`, when its location says remote without a country, or when it is `dream`. Skip the rest (a New York on-site role) without saving.
 - **A feed's date is when the feed saw the role, not when it was posted.** Himalayas listed Arctic Wolf, Bloom and Kepler roles as 1 November; the companies' own boards dated them September, August and May. Look the role up on the company's board before treating it as fresh.
 - **Dream roles are reported at any fit**, in their own part of the report, because the person wants to see everything at those companies.
-- **Save from the company's own posting.** A role whose `source` is `ashby`, `greenhouse` or `lever` is ready to save with that `source`, `sourceJobId` and `url`, even when a feed found it (`via`). Roles from the other board types save with their own `source` (`workday`, `workable`, `smartrecruiters`, `recruitee`, `rippling`) and the posting URL. Amazon roles save with `source: "company_site"` and the number in the key as `sourceJobId`, which is how Amazon roles are already stored.
-- A role whose `source` is a feed (`himalayas`, `wellfound`, `yc`, `wwr`, `mindtheproduct`, `communitech`, a fund's name) has no company posting yet. Find it first: `python3 .claude/skills/fenix-hunt/boards.py <company slug>`, or the company's careers page (`source: "company_site"`, the posting URL's id as `sourceJobId`). **A Himalayas, Wellfound, YC or We Work Remotely page is never the saved `url`.** Use the feed's pay and country list as a lead, and quote evidence from the company's posting. If the company's posting cannot be found, don't save; list the role in the report.
-- Send `postedAt` from the JSON with `postedAtSource: "board"` for company-board roles and `"listing"` for feed-only dates.
+- **Save from the company's own posting, with `post_job.py`.** A role whose `source` is a company board (`ashby`, `greenhouse`, `lever`, `workday`, `workable`, `smartrecruiters`, `recruitee`, `rippling`, `amazon`) is saved straight from the scan file, even when a feed found it (`via`):
+  `python3 .claude/skills/fenix-hunt/post_job.py --profile <p> --key <key> --from .scratch/hunt/scan.json --json '<fields>'`
+  The helper sends the role's `source`, id, `url`, location, board date and **whole posting** (as Markdown, `jdFormat: "md"`), so the description never passes through this session. `--json` carries what you judged: `company` (the display name; the scan has the board's slug), `compMin`, `compMax`, `currency`, `compSource`, `compEvidence`, `remoteVerdict`, `remoteEvidence`, `remoteEvidenceUrl`, `fitScore`, `whyGood`, `redFlags`, `jdSummary`. `compSource` and `remoteVerdict` are required. It prints the stage Fenix returned. `--dry-run` prints the body without saving. Amazon roles are stored with `source: "company_site"`; the helper does that.
+  - To judge a role, read its `text` in the scan file (`python3 -c` over the JSON, only the roles you are judging), not the printed list alone.
+  - A Workday, Workable, SmartRecruiters or Rippling role past the scan's 15-description cap has no text in the file. The helper fetches that one description when it saves; to read it first, look the company up with `boards.py`.
+  - "is not in …" means the role was hidden as seen in a full scan: `OUT=.scratch/hunt/boards.json python3 .claude/skills/fenix-hunt/boards.py <slug>` and retry with `--from .scratch/hunt/boards.json`.
+- A role whose `source` is a feed (`himalayas`, `wellfound`, `yc`, `wwr`, `mindtheproduct`, `communitech`, a fund's name) has no company posting yet. Find it first: `OUT=.scratch/hunt/boards.json python3 .claude/skills/fenix-hunt/boards.py <company slug>`, or the company's careers page (`source: "company_site"`, the posting URL's id as `sourceJobId`). **A Himalayas, Wellfound, YC or We Work Remotely page is never the saved `url`.** Use the feed's pay and country list as a lead, and quote evidence from the company's posting. If the company's posting cannot be found, don't save; list the role in the report.
+- `post_job.py` sends the board's `postedAt` with `postedAtSource: "board"`. For a role you save by hand from a careers page, send the feed's date with `postedAtSource: "listing"`.
 - Pay from a company board or careers page is `compSource: "company_site"`.
 
-**Mark what you judged.** After each batch, record the roles you read or deliberately skipped, by key: `python3 .claude/skills/fenix-hunt/scan.py --profile <p> --mark-seen <key> <key> …`. Mark only keys you actually judged; a role you did not get to stays unmarked and is printed again next run.
+**Save first, then mark what you judged.** A role marked seen is left out of the next scan file, so save it before marking it. After each batch, record the roles you read or deliberately skipped, by key: `python3 .claude/skills/fenix-hunt/scan.py --profile <p> --mark-seen <key> <key> …`. Mark only keys you actually judged; a role you did not get to stays unmarked and is printed again next run.
 
-`python3 .claude/skills/fenix-hunt/boards.py <slug>[:board[:extra]]` looks up one company (nothing hidden, writes `boards.json`); use it to find a role's own posting.
+`OUT=.scratch/hunt/boards.json python3 .claude/skills/fenix-hunt/boards.py <slug>[:board[:extra]]` looks up one company (nothing hidden); use it to find a role's own posting, then save it with `post_job.py --from .scratch/hunt/boards.json`. Without `OUT` it writes `boards.json` in the repo root; always set `OUT`.
 
 ## Other sources (full hunt, after LinkedIn)
 
@@ -132,13 +138,13 @@ Founders and hiring managers post "we're hiring" with a link to the job, often b
 
 ### Lenny's Jobs (browser, no login needed)
 
-`https://www.lennysjobs.com/` (built on TrueUp). The filters don't go in the URL, so set them by clicking: Job category **Product Management** (the default), Level **4 - Director, 5 - VP, 6 - SVP/CXO** (or the levels matching `targetTitles`), Location: the person's country. With a country selected it also shows remote roles open to that country and global remote roles. Each card shows title, company, location, age and posted pay. Cards don't link to the posting, so find each role on the company's own board: `python3 .claude/skills/fenix-hunt/boards.py <slug>` (try the company name lowercased) and save it from there, with that board as `source`. If `boards.py` does not find the company (it tries Ashby, Greenhouse and Lever by name), open its careers page and save with `source: "company_site"` and the posting URL's id as `sourceJobId`. Add companies that keep showing up to `watchlist.txt`.
+`https://www.lennysjobs.com/` (built on TrueUp). The filters don't go in the URL, so set them by clicking: Job category **Product Management** (the default), Level **4 - Director, 5 - VP, 6 - SVP/CXO** (or the levels matching `targetTitles`), Location: the person's country. With a country selected it also shows remote roles open to that country and global remote roles. Each card shows title, company, location, age and posted pay. Cards don't link to the posting, so find each role on the company's own board: `OUT=.scratch/hunt/boards.json python3 .claude/skills/fenix-hunt/boards.py <slug>` (try the company name lowercased) and save it from there, with that board as `source`. If `boards.py` does not find the company (it tries Ashby, Greenhouse and Lever by name), open its careers page and save with `source: "company_site"` and the posting URL's id as `sourceJobId`. Add companies that keep showing up to `watchlist.txt`.
 
 ### Remote-job boards (browser, no login needed)
 
 One pass each, after Lenny's Jobs. They list remote roles with posted pay and say which countries can apply, so they catch remote roles open to the person's country that LinkedIn buries. Pages read here count toward the opened-postings and company-site bounds. The URLs and filters for the person's country are in `hunt-profile.md`; the boards are remote100k.com, Remote Rocketship and Sparc.
 
-As with Lenny's Jobs, save each role from the company's own posting (its board via `boards.py`, or its careers page with `source: "company_site"`), never from the aggregator's page. Add companies that keep showing up to `watchlist.txt`.
+As with Lenny's Jobs, save each role from the company's own posting (its board via `boards.py` and `post_job.py`, or its careers page with `source: "company_site"`), never from the aggregator's page. Add companies that keep showing up to `watchlist.txt`.
 
 ### Startup boards (browser, no login needed)
 
@@ -166,12 +172,13 @@ The same role often appears on LinkedIn and on the company board. Before saving 
    `[...document.querySelectorAll('div[role=button][componentkey]')].map(d=>(d.getAttribute('componentkey').match(/\d{10}/)||[''])[0]).filter(Boolean)`
    The card's own text has the age line (the line ending in "ago", starting "Posted" or "Reposted"); return it with the id so candidates can be ordered by age.
    `javascript_tool` output is cut at about 1,000 characters, so return the ids alone, or short `id|title|company|salary` rows in slices. Ask Fenix which are already stored: `GET /api/p/<p>/jobs?source=linkedin&ids=<comma list>`. **Skip known ids** — this saves page reads; the upsert would dedupe anyway.
-2. Open the job (`https://www.linkedin.com/jobs/view/<id>/`). `get_page_text` on the raw page returns the job plus thousands of words of company feed. Instead, in one `javascript_tool` call:
-   - wait until `main` contains "About the job";
-   - slice `main.innerText` from the top card to the first of "Benefits found in job post", "Set alert for similar jobs", "See how you compare", "Exclusive Job Seeker Insights" or "How Jobgether Works";
-   - replace `main`'s children with a `<pre>` holding that text.
+2. Open the job (`https://www.linkedin.com/jobs/view/<id>/`). `get_page_text` on the raw page returns the job plus thousands of words of company feed. Instead, run the contents of `.claude/skills/fenix-hunt/linkedin_posting.js` in one `javascript_tool` call (read the file and pass its text). It waits for "About the job", turns the posting into light Markdown (the posting's bold titles as `## ` headings, its lists as `- ` bullets, links with their real address), stops at "Benefits found in job post" and the other LinkedIn blocks that follow, and replaces `main`'s children with a `<pre>` holding `TOP <top card on one line>` and then the posting.
 
-   Then call `get_page_text`. This only changes the page on screen and never writes to LinkedIn. The full description loads without clicking "See more".
+   Then call `get_page_text`. This only changes the page on screen and never writes to LinkedIn. The full description loads without clicking "See more". Save the posting part, whole, as `jdText` with `jdFormat: "md"`.
+
+   If the script fails or returns a posting with no line breaks (LinkedIn changed its page; see `docs/learnings/linkedin.md`), fall back to plain text: slice `main.innerText` from "About the job" to the first of "Benefits found in job post", "Set alert for similar jobs", "See how you compare", "Exclusive Job Seeker Insights" or "How Jobgether Works", put it in a `<pre>`, and save it as `jdText` **without** `jdFormat`.
+
+   When the same role is on the company's board (Ashby, Greenhouse, Lever and the others the scanner reads), prefer saving it from there with `post_job.py`: the posting is then stored without being read here.
 3. Extract:
    - **Comp**: base salary range + currency as posted. `compSource: "posting"`. Postings listed in another country often state only the US band ("U.S. base salary range: …"); record that band as posted and say in `redFlags` that an offer in the person's country may be lower. If the posting has none, check the company careers page for the same role (many US companies publish ranges there for pay-transparency laws) → `"company_site"`. If you can only infer (levels.fyi, similar roles), `"estimate"` and say where in `compEvidence`. Otherwise `"unknown"`. If the range clearly includes bonus/OTE, use only the base part or mark `estimate`.
    - **Remote verdict**:
@@ -180,11 +187,43 @@ The same role often appears on LinkedIn and on the company board. Before saving 
      - `us_only`: must live or be authorized to work in a country the person can't work in (for example "must reside in the US" or a US-state list), without sponsorship.
      - `onsite`: on-site or hybrid.
      - `unclear`: says remote but doesn't say where. Check the careers page before settling on `unclear`. Salary posted + no remote mention usually means not remote — read carefully.
-   - **Posting date**: the top card says "17 hours ago", "1 week ago" or "Reposted 2 days ago". Turn it into a date-time (now minus that span; "2 weeks ago" is 14 days) and send it as `postedAt` with `postedAtSource: "listing"`, and `reposted: true` when it says "Reposted". If there is no age line, send none of the three; don't guess. **LinkedIn's date can be weeks off** (Pacvue showed "Reposted 1 day ago" for a role its board first published five weeks earlier). For a strong candidate, and for every "Reposted" job, look the role up on the company's board (`python3 .claude/skills/fenix-hunt/boards.py <slug>` prints `posted <date>`, and the JSON has `postedAt`); when the company is on Ashby, Greenhouse or Lever, send the board's date with `postedAtSource: "board"` instead. Fenix keeps a board date over a listing date, and never lets a re-post make a job look newer.
+   - **Posting date**: the top card says "17 hours ago", "1 week ago" or "Reposted 2 days ago". Turn it into a date-time (now minus that span; "2 weeks ago" is 14 days) and send it as `postedAt` with `postedAtSource: "listing"`, and `reposted: true` when it says "Reposted". If there is no age line, send none of the three; don't guess. **LinkedIn's date can be weeks off** (Pacvue showed "Reposted 1 day ago" for a role its board first published five weeks earlier). For a strong candidate, and for every "Reposted" job, look the role up on the company's board (`OUT=.scratch/hunt/boards.json python3 .claude/skills/fenix-hunt/boards.py <slug>` prints `posted <date>`, and the JSON has `postedAt`); when the company is on Ashby, Greenhouse or Lever, send the board's date with `postedAtSource: "board"` instead. Fenix keeps a board date over a listing date, and never lets a re-post make a job look newer.
    - **Fit 0–100** against canonical and `targetTitles` (what to weigh is in `hunt-profile.md`). `whyGood`: 2–4 sentences naming the person's specific matching experience, with numbers only as they appear in their career record. `redFlags`: anything off (tiny company, crypto, heavy travel, equity-heavy comp, years-of-experience mismatch).
 4. `POST http://localhost:3007/api/p/<p>/jobs` with:
-   `source:"linkedin"`, `sourceJobId`, `url` (canonical `/jobs/view/<id>/`), `companyUrl` (careers page if visited), `company`, `title`, `locationText`, `compMin`, `compMax`, `currency` (USD, CAD, EUR or GBP — Fenix rejects others; for another currency, convert yourself, send USD with `compSource: "estimate"`, and put the original figure in `compEvidence`), `compSource`, `compEvidence`, `remoteVerdict`, `remoteEvidence`, `remoteEvidenceUrl`, `jdText` (full text), `fitScore`, `whyGood`, `redFlags`, `easyApply`, `applicants` (a number: "Over 100 applicants" → 100; Fenix rejects text), `foundVia` (only when a hiring post led to the job: the post's address), `postedAt` (ISO date-time with a zone, e.g. `2026-11-12T14:00:00.000Z`), `postedAtSource` (`board` or `listing`; required with `postedAt`), `reposted`.
+   `source:"linkedin"`, `sourceJobId`, `url` (canonical `/jobs/view/<id>/`), `companyUrl` (careers page if visited), `company`, `title`, `locationText`, `compMin`, `compMax`, `currency` (USD, CAD, EUR or GBP — Fenix rejects others; for another currency, convert yourself, send USD with `compSource: "estimate"`, and put the original figure in `compEvidence`), `compSource`, `compEvidence`, `remoteVerdict`, `remoteEvidence`, `remoteEvidenceUrl`, `jdText` (the whole posting), `jdFormat` (`"md"` when `jdText` came from `linkedin_posting.js`; leave it out for plain text), `jdSummary`, `fitScore`, `whyGood`, `redFlags` (the last three as described in "How to write the fit notes and the summary"), `easyApply`, `applicants` (a number: "Over 100 applicants" → 100; Fenix rejects text), `foundVia` (only when a hiring post led to the job: the post's address), `postedAt` (ISO date-time with a zone, e.g. `2026-11-12T14:00:00.000Z`), `postedAtSource` (`board` or `listing`; required with `postedAt`), `reposted`.
    Fenix decides the stage. Read the response: `SHORTLISTED`, `FOUND` (needs a check), or `FILTERED_OUT`. A posting 21 days old or more with fit under `settings.strongMatchFit` comes back `FOUND` with a "Posted over 3 weeks ago" check instead of `SHORTLISTED`; that is the stale rule, not an error.
+
+## How to write the fit notes and the summary
+
+The job page draws these three fields as lists, so write **one point per line**, each starting with a short label and a colon. The page puts the label in bold. No bullet marks, no paragraphs. Use the labels that apply; the usual ones are below.
+
+`whyGood` — why this role fits this person, 2 to 5 lines. Numbers only as they appear in the career record.
+```
+Level: senior director leading a team of product managers
+Pay: the band clears his floor ($206K–$369K USD for U.S.-based roles)
+Location: open to Canada
+Experience: he built Ember's data pipeline and platform at Constant Contact
+```
+
+`redFlags` — what could sink it or needs checking, one line each.
+```
+Domain gap: asks for deep experience with data products in the AEC industry, not in his record
+Location: the posting says hybrid while LinkedIn tags it remote; the Canada location is the Toronto office
+Travel: up to 25%
+Posting age: reposted; the board dates it five weeks back
+History: he applied to Autodesk's Platform Trust director role on 2026-11-14
+```
+
+`jdSummary` — the role in at most six lines, from the posting only (no judgment): what it owns, who it reports to, the team, the must-haves. It is shown above the full posting so the person rarely has to open it.
+```
+Owns: strategy and roadmap for Autodesk's AEC data products, across the Forma industry cloud
+Reports to: VP of AEC Data
+Team: leads a team of product managers
+Must have: 10+ years in software product management, 5+ leading PM teams, enterprise platform or data products
+Also: global role, hybrid in the US, Canada or UK
+```
+
+A value written on one line is drawn as a paragraph, which is how jobs saved before 2026-11-15 look. Don't rewrite old jobs for format alone.
 
 ## Closed postings (full hunt, last)
 
