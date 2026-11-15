@@ -2,8 +2,8 @@
 description or date, a detail step that is run only for roles that passed the title filter.
 
 A lister returns (roles, capped). A missing board raises FetchError with status 404."""
-import re
-from hunt_core import ISO3, iso, iso_ago, iso_from, money, role, strip_html
+import html, re
+from hunt_core import ISO3, html_to_md, iso, iso_ago, iso_from, money, role, strip_html
 from hunt_http import FetchError, fetch_json
 
 MAX_PAGES = 5
@@ -18,7 +18,10 @@ def parse_ashby(d, slug):
         locs = [j.get("location", "")] + [x.get("location", "") for x in j.get("secondaryLocations") or []]
         out.append(role("ashby", j["id"], slug, j["title"], j.get("jobUrl"), "; ".join(filter(None, locs)), j.get("isRemote"),
                         (j.get("compensation") or {}).get("compensationTierSummary"), iso(j.get("publishedAt")),
-                        j.get("descriptionPlain", "")))
+                        j.get("descriptionPlain", ""),
+                        # Older answers carry only the plain text, which is saved as it is.
+                        jd=html_to_md(j.get("descriptionHtml")) or j.get("descriptionPlain", ""),
+                        jd_md=bool(j.get("descriptionHtml"))))
     return out
 
 
@@ -28,7 +31,9 @@ def parse_greenhouse(d, slug):
         text = strip_html(j.get("content", ""))
         pay = re.search(r"\$\s?\d{2,3}[,\d]*\s?(?:-|–|to)\s?\$?\s?\d{2,3}[,\d]*", text)
         out.append(role("greenhouse", j["id"], slug, j["title"], j.get("absolute_url"), (j.get("location") or {}).get("name", ""),
-                        None, pay.group(0) if pay else None, iso(j.get("first_published")), text))
+                        None, pay.group(0) if pay else None, iso(j.get("first_published")), text,
+                        # Greenhouse sends the posting's HTML escaped once.
+                        jd=html_to_md(html.unescape(j.get("content") or ""))))
     return out
 
 
@@ -41,8 +46,16 @@ def parse_lever(d, slug):
         s = j.get("salaryRange") or {}
         out.append(role("lever", j["id"], slug, j["text"], j.get("hostedUrl"),
                         ", ".join(c.get("allLocations") or [c.get("location") or ""]), j.get("workplaceType") == "remote",
-                        money(s.get("min"), s.get("max"), s.get("currency")), iso(j.get("createdAt")), text))
+                        money(s.get("min"), s.get("max"), s.get("currency")), iso(j.get("createdAt")), text,
+                        jd=html_to_md(lever_html(j))))
     return out
+
+
+def lever_html(j):
+    """A Lever posting's parts in page order: description, each titled list, the closing text."""
+    para = lambda plain: "".join(f"<p>{html.escape(p)}</p>" for p in (plain or "").split("\n") if p.strip())
+    lists = "".join(f"<h3>{html.escape(l.get('text') or '')}</h3><ul>{l.get('content') or ''}</ul>" for l in j.get("lists", []))
+    return (j.get("description") or para(j.get("descriptionPlain"))) + lists + (j.get("additional") or para(j.get("additionalPlain")))
 
 
 def ashby(slug, extra, ctx):
@@ -65,7 +78,9 @@ def parse_recruitee(d, slug):
         s = j.get("salary") or {}
         out.append(role("recruitee", j["id"], j.get("company_name") or slug, j["title"], j.get("careers_url"), j.get("location", ""),
                         j.get("remote"), money(s.get("min"), s.get("max"), s.get("currency")), iso(j.get("published_at")),
-                        strip_html(f"{j.get('description', '')} {j.get('requirements', '')}")))
+                        strip_html(f"{j.get('description', '')} {j.get('requirements', '')}"),
+                        jd=html_to_md(f"{j.get('description') or ''}<h3>Requirements</h3>{j.get('requirements') or ''}"
+                                      if j.get("requirements") else j.get("description") or "")))
     return out
 
 
@@ -216,12 +231,17 @@ def workday_detail(r, slug, extra):
 
 # --- Amazon: the slug is ignored; the search is for the person's home country. ---
 
+AMAZON_PARTS = (("Description", "description"), ("Basic qualifications", "basic_qualifications"),
+                ("Preferred qualifications", "preferred_qualifications"))
+
+
 def parse_amazon(d):
     out = []
     for j in (d or {}).get("jobs", []):
         text = strip_html(" ".join(j.get(k) or "" for k in ("description", "basic_qualifications", "preferred_qualifications")))
         out.append(role("amazon", j.get("id_icims") or j["id"], "Amazon", j["title"], "https://www.amazon.jobs" + j.get("job_path", ""),
-                        j.get("normalized_location", ""), None, None, iso_from(j.get("posted_date"), "%B %d, %Y"), text))
+                        j.get("normalized_location", ""), None, None, iso_from(j.get("posted_date"), "%B %d, %Y"), text,
+                        jd=html_to_md("".join(f"<h3>{head}</h3><p>{j.get(k)}</p>" for head, k in AMAZON_PARTS if j.get(k)))))
     return out
 
 

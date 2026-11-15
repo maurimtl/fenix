@@ -1,5 +1,6 @@
 """Pure helpers for the hunt scanner: title filters, dates, posting links, merging. No network, no files."""
 import html, re
+from html.parser import HTMLParser
 from datetime import datetime, timedelta, timezone
 
 SENIOR = re.compile(r"\b(director|head|s?vp|evp|vice president|chief|cpo|gm|general manager)\b.*\b(product|growth|ai)\b"
@@ -28,6 +29,98 @@ def keep_title(title, wide=False):
 
 def strip_html(text):
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(text or ""))).strip()
+
+
+JD_MAX = 60_000  # Fenix's limit for a saved posting
+_HEADINGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
+_BREAKS = {"p", "div", "br", "section", "article", "tr", "table", "blockquote"}
+_LISTS = {"ul", "ol"}
+_HEADING_MAX = 80
+
+
+class _Markdown(HTMLParser):
+    """A posting's HTML as light Markdown: '## ' headings, '- ' bullets, blank lines between paragraphs."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out, self.cur, self.prefix = [], [], ""
+        self.depth = self.bold = self.skip = 0
+        self.bold_text = self.plain_text = False
+
+    def flush(self):
+        line = re.sub(r"\s+", " ", "".join(self.cur)).strip()
+        if not line:
+            # An empty block (a <p> opening inside an <li>) keeps the pending bullet or heading mark.
+            self.cur = []
+            return
+        prefix, bold_only = self.prefix, self.bold_text and not self.plain_text
+        self.cur, self.prefix, self.bold_text, self.plain_text = [], "", False, False
+        if not prefix and bold_only and len(line) <= _HEADING_MAX:
+            prefix, line = "## ", line.rstrip(":")
+        typed_bullet = re.match(r"[-•*]\s+(?=\S)", line) if not prefix else None
+        if typed_bullet:
+            # Some boards type their bullets as text ("- item<br>"); they are bullets all the same.
+            prefix, line = "- ", line[typed_bullet.end():]
+        elif not prefix:
+            # A line that only looks like a heading or a quote stays text.
+            line = re.sub(r"^([#>])", r"\\\1", line)
+        if prefix.startswith("## ") and self.out and self.out[-1] != "":
+            self.out.append("")
+        self.out.append(prefix + line)
+        if "- " not in prefix:
+            self.out.append("")
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style"):
+            self.skip += 1
+        elif tag in _HEADINGS:
+            self.flush()
+            self.prefix = "## "
+        elif tag == "li":
+            self.flush()
+            self.prefix = "  " * max(self.depth - 1, 0) + "- "
+        elif tag in _LISTS:
+            self.flush()
+            self.depth += 1
+        elif tag in _BREAKS:
+            self.flush()
+        elif tag in ("strong", "b"):
+            self.bold += 1
+
+    def handle_endtag(self, tag):
+        if tag in ("script", "style"):
+            self.skip = max(self.skip - 1, 0)
+        elif tag in _LISTS:
+            self.flush()
+            self.depth = max(self.depth - 1, 0)
+            if self.depth == 0 and self.out and self.out[-1] != "":
+                self.out.append("")
+        elif tag in _HEADINGS or tag == "li":
+            self.flush()
+            self.prefix = ""
+        elif tag in _BREAKS:
+            self.flush()
+        elif tag in ("strong", "b"):
+            self.bold = max(self.bold - 1, 0)
+
+    def handle_data(self, data):
+        if self.skip:
+            return
+        if data.strip():
+            if self.bold:
+                self.bold_text = True
+            else:
+                self.plain_text = True
+        self.cur.append(data)
+
+
+def html_to_md(text):
+    """A posting's HTML as light Markdown, cut to what Fenix stores. Plain text with no tags comes back as one paragraph."""
+    parser = _Markdown()
+    parser.feed(text or "")
+    parser.close()
+    parser.flush()
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(parser.out)).strip()[:JD_MAX]
 
 
 def iso(value):
@@ -95,10 +188,12 @@ def is_repost_link(url):
     return bool(m and REPOST_HOSTS.search(m.group(1)))
 
 
-def role(source, job_id, company, title, url, loc="", remote=None, comp=None, posted=None, text="", feed=None):
+def role(source, job_id, company, title, url, loc="", remote=None, comp=None, posted=None, text="", feed=None, jd="",
+         jd_md=True):
+    """`text` is the flattened posting the filters read; `jd` is the posting as saved (Markdown unless jd_md is False)."""
     return dict(source=source, sourceJobId=str(job_id), company=company or "", title=title or "", loc=loc or "",
                 remote=remote, url=url, comp=comp, postedAt=posted, text=text or "", via=[feed] if feed else [],
-                dream=False)
+                dream=False, jd=(jd or "")[:JD_MAX], jdFormat="md" if jd and jd_md else None)
 
 
 def key(r):
@@ -127,6 +222,8 @@ def merge(roles):
         for f in ("comp", "postedAt", "loc", "text"):
             if not winner.get(f) and loser.get(f):
                 winner[f] = loser[f]
+        if not winner.get("jd") and loser.get("jd"):
+            winner["jd"], winner["jdFormat"] = loser["jd"], loser.get("jdFormat")
         winner["dream"] = winner["dream"] or loser["dream"]
 
     # Company-board copies first, so they win.

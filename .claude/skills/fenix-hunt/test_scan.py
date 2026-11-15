@@ -214,6 +214,52 @@ check("status lines", [scan.status_line(n, s) for n, s in [
 check("args", scan.parse_args(["--profile", "p", "--all", "--mark-seen", "a:1", "b:2"]),
       dict(profile="p", all=True, only=None, mark=["a:1", "b:2"], entries=[]))
 
+# --- postings as light Markdown ---
+md = hunt_core.html_to_md
+check("md: headings, paragraphs, nested lists",
+      md("<h2>About</h2><p>We build &amp; ship.</p><ul><li>One</li><li>Two<ul><li>Nested</li></ul></li></ul>"),
+      "## About\n\nWe build & ship.\n\n- One\n- Two\n  - Nested")
+check("md: a heading in a div, a bold-only paragraph, entities",
+      md("<div><h3>Role</h3></div><p><strong>What you&rsquo;ll do:</strong></p><p>Lead&nbsp;things &mdash; well.</p>"),
+      "## Role\n\n## What you\u2019ll do\n\nLead things \u2014 well.")
+check("md: bold inside a sentence is not a heading", md("<p><strong>Note:</strong> apply soon</p>"), "Note: apply soon")
+check("md: a paragraph inside a list item keeps its bullet",
+      md("<ul><li><p>Para item</p></li><li>Plain item</li></ul><p>After</p>"), "- Para item\n- Plain item\n\nAfter")
+check("md: an empty list item or heading leaves no mark on the next line",
+      [md("<ul><li></li></ul><p>Text</p>"), md("<h2></h2><p>Text</p>")], ["Text", "Text"])
+check("md: bullets typed as text become bullets", md("- Are 18 or older<br/>- Has an MBA<br/>\u2022 Third"),
+      "- Are 18 or older\n- Has an MBA\n- Third")
+check("md: text that looks like markup stays text",
+      md("<p>C# and 5* hotels, snake_case, $209,040\u2014$296,140</p><p># not a heading</p><p>> not a quote</p><p>-5% is not a bullet</p>"),
+      "C# and 5* hotels, snake_case, $209,040\u2014$296,140\n\n\\# not a heading\n\n\\> not a quote\n\n-5% is not a bullet")
+check("md: line breaks, scripts and styles", md("<style>x{}</style><p>Line one<br>Line two</p><script>hide()</script>"),
+      "Line one\n\nLine two")
+check("md: no tags, and nothing", [md("Just text"), md(""), md(None)], ["Just text", "", ""])
+check("md: cut at Fenix's limit", len(md("<p>" + "x" * 70_000 + "</p>")), 60_000)
+r = hunt_ats.parse_greenhouse({"jobs": [{"id": 1, "title": "Head of Product",
+                                         "content": "&lt;h2&gt;The role&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Own it&lt;/li&gt;&lt;/ul&gt;"}]}, "x")[0]
+check("greenhouse: once-escaped HTML", (r["jd"], r["jdFormat"], r["text"]), ("## The role\n\n- Own it", "md", "The role Own it"))
+r = hunt_ats.parse_ashby({"jobs": [{"id": "a", "title": "Head of Product", "descriptionPlain": "ROLE\n\n - Own it",
+                                    "descriptionHtml": "<h1>Role</h1><ul><li>Own it</li></ul>"}]}, "x")[0]
+check("ashby: HTML description", (r["jd"], r["jdFormat"], r["text"]), ("## Role\n\n- Own it", "md", "ROLE\n\n - Own it"))
+r = hunt_ats.parse_ashby({"jobs": [{"id": "a", "title": "Head of Product", "descriptionPlain": "ROLE\n\n - Own it"}]}, "x")[0]
+check("ashby: plain text only is saved as plain text", (r["jd"], r["jdFormat"]), ("ROLE\n\n - Own it", None))
+r = hunt_ats.parse_lever([{"id": "l", "text": "VP Product", "descriptionPlain": "We are hiring.\nJoin us.",
+                           "lists": [{"text": "You will", "content": "<li>Lead</li><li>Ship</li>"}], "additional": "<div>Equal opportunity.</div>"}], "x")[0]
+check("lever: description, titled lists, closing text",
+      r["jd"], "We are hiring.\n\nJoin us.\n\n## You will\n\n- Lead\n- Ship\n\nEqual opportunity.")
+r = hunt_ats.parse_recruitee(load("recruitee.json"), "bunq")[0]
+check("recruitee: requirements get a heading and bullets",
+      (r["jdFormat"], "\n\n## Requirements\n\n- " in r["jd"], "<" in r["jd"]), ("md", True, False))
+r = hunt_ats.parse_amazon(load("amazon.json"))[0]
+check("amazon: three titled parts with bullets",
+      (r["jd"].startswith("## Description\n\n"), "\n\n## Basic qualifications\n\n- " in r["jd"], "\n\n## Preferred qualifications\n\n- " in r["jd"]),
+      (True, True, True))
+a, b = hunt_core.role("ashby", "1", "x", "VP Product", "u"), hunt_core.role("himalayas", "9", "x", "VP Product", "u", feed="himalayas", jd="## Feed copy")
+check("role: no posting, no format", (a["jd"], a["jdFormat"]), ("", None))
+merged, _ = hunt_core.merge([a, b])
+check("merge carries the posting and its format", (len(merged), merged[0]["jd"], merged[0]["jdFormat"]), (1, "## Feed copy", "md"))
+
 failed = [c for c in checks if not c[1]]
 for name, _, got, want in failed:
     print(f"FAIL {name}\n   got  {got!r}\n   want {want!r}")
