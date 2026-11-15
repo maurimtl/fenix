@@ -26,6 +26,12 @@ for title, wide, want in [
     ("Director, Product Security", True, True), ("Product Operations Manager", True, True), ("Growth Lead, Brazil", True, True), ("Staff Software Engineer, Growth", True, False), ("", True, False),
 ]:
     check(f"keep_title {title!r} wide={wide}", hunt_core.keep_title(title, wide), want)
+for title in ["Member of Product Staff, Agents", "Senior Product Manager, Agents", "Staff Product Manager",
+              "Principal Product Manager, Platform", "Group Product Manager"]:
+    check(f"keep_title board {title!r}", hunt_core.keep_title(title, board=True), True)
+    check(f"keep_title feed {title!r}", hunt_core.keep_title(title), False)
+for title in ["Product Manager, Billing", "Associate Product Manager", "Senior Product Designer", "Senior Product Marketing Manager"]:
+    check(f"keep_title board {title!r}", hunt_core.keep_title(title, board=True), False)
 
 # --- dates ---
 check("iso: Ashby text", hunt_core.iso("2026-11-12T15:04:05.123456+00:00"), "2026-11-12T15:04:05.000Z")

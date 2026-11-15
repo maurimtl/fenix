@@ -90,7 +90,7 @@ def scan_boards(entries, dream, ctx):
 
     def one(entry):
         slug, board, extra = (entry.split(":", 2) + ["", ""])[:3]
-        res = scan_company(slug, board or None, extra, ctx, lambda t: keep_title(t, slug in wide))
+        res = scan_company(slug, board or None, extra, ctx, lambda t: keep_title(t, slug in wide, board=True))
         for r in res["roles"]:
             r["dream"] = slug in wide
             r["origin"] = slug

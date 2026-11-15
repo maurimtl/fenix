@@ -5,6 +5,8 @@ from datetime import datetime, timedelta, timezone
 
 SENIOR = re.compile(r"\b(director|head|s?vp|evp|vice president|chief|cpo|gm|general manager)\b.*\b(product|growth|ai)\b"
                     r"|\b(product|growth)\b.*\b(director|head|s?vp|evp|vice president|lead)\b", re.I)
+# Senior individual-contributor PM titles, kept on company boards only; feeds would flood with them.
+SENIOR_IC = re.compile(r"\b(senior|sr\.?|staff|principal|group|lead)\b.*\bproduct manager\b|\bmember of (the )?product staff\b", re.I)
 WIDE = re.compile(r"\b(product|growth)\b", re.I)
 SKIP = re.compile(r"design|marketing|engineer|sales|account|counsel|legal|finance", re.I)
 # "product" and "growth" in a dream company's title are often not product work: Product Architect, Product Security.
@@ -18,11 +20,12 @@ ISO3 = {"CA": "CAN", "US": "USA", "GB": "GBR", "IE": "IRL", "AU": "AUS", "DE": "
         "ES": "ESP", "MX": "MEX", "IN": "IND", "BR": "BRA"}
 
 
-def keep_title(title, wide=False):
-    """Senior product, growth or AI titles; with wide (dream companies) any product or growth title."""
+def keep_title(title, wide=False, board=False):
+    """Senior product, growth or AI titles; on company boards also senior IC product manager titles; with wide
+    (dream companies) any product or growth title."""
     if not title or SKIP.search(title):
         return False
-    if SENIOR.search(title):
+    if SENIOR.search(title) or (board and SENIOR_IC.search(title)):
         return True
     return bool(wide and WIDE.search(title) and not WIDE_SKIP.search(title))
 
