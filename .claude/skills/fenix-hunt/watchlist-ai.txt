@@ -1,7 +1,7 @@
 # AI companies' boards, checked every hunt like watchlist.txt (same line format). On these boards, and for dream
 # companies, the scanner also keeps senior individual-contributor PM titles (Senior/Staff/Principal/Group PM,
 # Member of Product Staff); on watchlist.txt boards it keeps only director-level and up. List and sources: docs/ai-companies.md.
-# Already-watched AI companies (moved here 2026-11-15)
+# AI companies watched before the list above was built
 cohere:ashby
 cursor:ashby
 gamma:ashby

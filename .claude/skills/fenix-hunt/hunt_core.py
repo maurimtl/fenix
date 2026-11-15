@@ -9,7 +9,7 @@ SENIOR = re.compile(r"\b(director|head|s?vp|evp|vice president|chief|cpo|gm|gene
 SENIOR_IC = re.compile(r"\b(senior|sr\.?|staff|principal|group|lead)\b.*\bproduct manager\b|\bmember of (the )?product staff\b", re.I)
 # "Open to hiring around the world": a hiring or work word, then within four words a worldwide phrase.
 OPEN_WORLD = re.compile(r"\b(hiring|hire|hires|remote|work|based|located|candidates?|distributed|team|employees)\b\W+"
-                        r"(?:[\w'-]+\W+){0,4}?(anywhere|around the world|worldwide|globally|any country)\b", re.I)
+                        r"(?:[\w'-]+\W+){0,4}?(anywhere(?!\s+in\s+(?:the\s+)?(?:u\.?s\.?a?\b|united states|america\b))|around the world|worldwide|globally|any country)\b", re.I)
 WIDE = re.compile(r"\b(product|growth)\b", re.I)
 SKIP = re.compile(r"design|marketing|engineer|sales|account|counsel|legal|finance", re.I)
 # "product" and "growth" in a dream company's title are often not product work: Product Architect, Product Security.

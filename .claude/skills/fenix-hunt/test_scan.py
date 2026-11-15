@@ -213,7 +213,8 @@ check("finish: keys are source:id, newest first", [r["key"] for r in shown], ["g
 for text, want in [("open to hiring around the world for the right candidate", True), ("Remote: work from anywhere", True),
                    ("candidates based anywhere in North America or Europe", True), ("We hire globally", True),
                    ("our team is distributed worldwide", True), ("Trusted by teams worldwide", False), ("", False),
-                   ("shipping globally since 2010", False), ("Remote (US only)", False)]:
+                   ("shipping globally since 2010", False), ("Remote (US only)", False), ("Remote, anywhere in the United States", False),
+                   ("work from anywhere in the US", False)]:
     check(f"open_world {text!r}", hunt_core.open_world(text), want)
 world = hunt_core.role("ashby", "ba48", "runway-ml", "Member of Product Staff, Agents", "https://jobs.ashbyhq.com/runway-ml/ba48",
                        loc="Remote; New York, NY; San Francisco, CA",
@@ -225,11 +226,18 @@ check("role line marks world", " | world | " in scan.role_line(w), True)
 # Senior IC titles only on ic boards and dream companies; the filter scan_boards hands each board decides.
 filters = {}
 real_scan_company = scan.scan_company
-scan.scan_company = lambda slug, board, extra, ctx, keep: filters.setdefault(slug, keep) and dict(status="ok", board=board, read=0, roles=[])
-scan.scan_boards(["stripe:greenhouse", "runway-ml:ashby"], ["openai:ashby"], ctx, ic={"runway-ml"})
-scan.scan_company = real_scan_company
+def remember_filter(slug, board, extra, ctx, keep):
+    filters[slug] = keep
+    return dict(status="ok", board=board, read=0, roles=[])
+scan.scan_company = remember_filter
+try:
+    scan.scan_boards(["stripe:greenhouse", "runway-ml:ashby"], ["openai:ashby"], ctx, ic={"runway-ml"})
+finally:
+    scan.scan_company = real_scan_company
 check("scan_boards: IC titles by board", {s: f("Staff Product Manager") for s, f in filters.items()},
       {"stripe": False, "runway-ml": True, "openai": True})
+slugs = lambda name: {e.split(":")[0] for e in scan.lines(name)}
+check("no company in both watchlist files", sorted(slugs("watchlist.txt") & slugs("watchlist-ai.txt")), [])
 check("status lines", [scan.status_line(n, s) for n, s in [
     ("a", dict(status="notfound")), ("b", dict(status="failed", reason="500 Server Error")),
     ("c", dict(status="ok", board="lever", read=0, kept=0)),

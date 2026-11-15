@@ -62,5 +62,5 @@ anthropic:greenhouse
 openai:ashby
 # Workday boards (added 2026-11-13). CrowdStrike's "VP, Horizontal AI Product" reached LinkedIn only through a reposter.
 crowdstrike:workday:wd5/crowdstrikecareers
-# Large AI company with many senior PM roles: director-level and up only (moved from watchlist-ai.txt 2026-11-15)
+# Large AI company with many senior PM roles: director-level and up only
 databricks:greenhouse
