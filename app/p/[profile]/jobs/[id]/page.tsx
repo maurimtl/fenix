@@ -9,6 +9,7 @@ import { CompGauge } from "@/components/comp-gauge";
 import { FitNotes } from "@/components/fit-notes";
 import { Markdown } from "@/components/markdown";
 import { summaryItems } from "@/lib/jobs/notes";
+import { JOB_TAB_LABEL, jobTabs, pickTab } from "@/lib/jobs/tabs";
 import { JobStageSelect } from "@/components/job-stage-select";
 import { getJob } from "@/lib/jobs/repo";
 import { ageLine, freshness } from "@/lib/jobs/freshness";
@@ -41,7 +42,13 @@ function hostOf(link: string): string {
 const PRE_APPLY = new Set(["FOUND", "SHORTLISTED", "CV_READY"]);
 const INTERVIEW_STAGES = new Set(["APPLIED", "INTERVIEWING"]);
 
-export default async function JobDetail({ params }: { params: Promise<{ profile: string; id: string }> }) {
+export default async function JobDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ profile: string; id: string }>;
+  searchParams: Promise<{ tab?: string | string[] }>;
+}) {
   const { id, profile: slug } = await params;
   const profile = await pageProfile(slug);
   const [job, answers, settings, who, rounds] = await Promise.all([
@@ -52,6 +59,9 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
     interviewsForJob(profile, id),
   ]);
   if (!job) notFound();
+  const tabs = jobTabs({ answers: answers.length > 0, posting: !!job.jdText });
+  const tab = pickTab((await searchParams).tab, tabs);
+  const jobPath = pagePath(profile, `/jobs/${job.id}`);
   const { minUsd, maxUsd } = usdRange(job);
   const postedNow = new Date();
   const back = job.stage === "FILTERED_OUT" ? { href: pagePath(profile, "/jobs/filtered"), label: "Filtered out" } : { href: pagePath(profile, "/jobs"), label: "Pipeline" };
@@ -73,8 +83,21 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
           <JobStageSelect id={job.id} stage={job.stage} closedReason={job.closedReason} />
         </div>
 
+        {tabs.length > 1 && (
+          <nav className="job-tabs" aria-label="Sections of this job">
+            {tabs.map((t) => (
+              <Link key={t} href={t === "overview" ? jobPath : `${jobPath}?tab=${t}`} aria-current={t === tab ? "page" : undefined} scroll={false}>
+                {JOB_TAB_LABEL[t]}
+                {t === "application" && <span className="job-tab-count">{answers.length}</span>}
+              </Link>
+            ))}
+          </nav>
+        )}
+
         <div className="dossier">
           <div className="dossier-main">
+            {tab === "overview" && (
+              <>
             {PRE_APPLY.has(job.stage) && <PromptBox text={prompts.apply(who, job.company, job.title)} />}
             {INTERVIEW_STAGES.has(job.stage) && <PromptBox text={prompts.brief(who, job.company)} />}
             {rounds.length > 0 && (
@@ -116,15 +139,28 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
                 <FitNotes text={job.redFlags} />
               </section>
             )}
+            {job.jdSummary && (
+              <section className="block">
+                <h2>The role</h2>
+                <FitNotes items={summaryItems(job.jdSummary)} />
+              </section>
+            )}
             {job.notes && (
               <section className="block">
                 <h2>Your notes</h2>
                 <p className="prose">{job.notes}</p>
               </section>
             )}
-            {answers.length > 0 && (
+              </>
+            )}
+            {tab === "application" && (
               <section className="block">
                 <h2>Application answers</h2>
+                {job.variant && (
+                  <p className="muted small">
+                    Sent with <Link href={pagePath(profile, `/cv/${job.variant.id}`)}>the tailored CV</Link>.
+                  </p>
+                )}
                 <dl className="answers">
                   {answers.map((a) => (
                     <div key={a.id}>
@@ -135,24 +171,16 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
                 </dl>
               </section>
             )}
-            {(job.jdSummary || job.jdText) && (
+            {tab === "posting" && job.jdText && (
               <section className="block">
                 <h2>Job description</h2>
-                {job.jdSummary && <FitNotes items={summaryItems(job.jdSummary)} />}
-                {job.jdText && (
-                  <>
-                    <p className="muted small">Saved {job.firstSeenAt.toLocaleDateString("en-CA", { month: "long", day: "numeric" })}, in case the posting comes down.</p>
-                    <details className="jd-wrap">
-                      <summary>Show the full posting</summary>
-                      {job.jdFormat === "md" ? (
-                        <div className="jd jd-md">
-                          <Markdown text={job.jdText} />
-                        </div>
-                      ) : (
-                        <pre className="jd">{job.jdText}</pre>
-                      )}
-                    </details>
-                  </>
+                <p className="muted small">Saved {job.firstSeenAt.toLocaleDateString("en-CA", { month: "long", day: "numeric" })}, in case the posting comes down.</p>
+                {job.jdFormat === "md" ? (
+                  <div className="jd jd-md">
+                    <Markdown text={job.jdText} />
+                  </div>
+                ) : (
+                  <pre className="jd">{job.jdText}</pre>
                 )}
               </section>
             )}

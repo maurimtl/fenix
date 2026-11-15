@@ -8,6 +8,7 @@ import { ageLine, bestMatchOrder, freshness, FRESHNESS_RANK, mergePosted, postin
 import { jobInputSchema } from "../lib/jobs/schema";
 import { boardDate } from "../lib/jobs/posted-date";
 import { parseNotes, summaryItems } from "../lib/jobs/notes";
+import { jobTabs, pickTab } from "../lib/jobs/tabs";
 
 const cases: [string, Parameters<typeof classify>[0], ReturnType<typeof classify>][] = [
   ["180-220k USD posting, country_ok → filtered on comp",
@@ -290,6 +291,15 @@ const extra: [string, () => void][] = [
   }],
   ["save schema rejects an unknown body format", () =>
     assert.equal(jobInputSchema.safeParse({ ...INPUT, jdFormat: "html" }).success, false)],
+  ["job tabs: a job with answers and a posting offers all three", () =>
+    assert.deepEqual(jobTabs({ answers: true, posting: true }), ["overview", "application", "posting"])],
+  ["job tabs: a job with neither offers only the overview", () => assert.deepEqual(jobTabs({ answers: false, posting: false }), ["overview"])],
+  ["job tabs: the address picks the tab", () => assert.equal(pickTab("posting", ["overview", "application", "posting"]), "posting")],
+  ["job tabs: a missing, unknown, repeated or unoffered tab falls back to the overview", () =>
+    assert.deepEqual(
+      [pickTab(undefined, ["overview", "posting"]), pickTab("nope", ["overview", "posting"]), pickTab(["posting", "x"], ["overview", "posting"]), pickTab("application", ["overview", "posting"])],
+      ["overview", "overview", "posting", "overview"],
+    )],
   ["USD pay names its currency", () => assert.equal(formatComp({ compMin: 240000, compMax: 320000, currency: "USD", compSource: "posting" }), "$240k–$320k USD, posted")],
   ["CAD pay shows a USD conversion", () => assert.match(formatComp({ compMin: 255500, compMax: 365000, currency: "CAD", compSource: "company_site" }), /^\$256k–\$365k CAD \(≈ \$\d+k–\$\d+k USD\)/)],
 ];

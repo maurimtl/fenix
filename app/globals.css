@@ -316,8 +316,11 @@ code { font-size: 0.92em; background: #e9edf2; padding: 1px 5px; border-radius: 
 .banner-fail { background: var(--fail-bg); color: var(--fail); }
 .banner-check { background: var(--check-bg); color: var(--check); }
 .jd { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 14.5px; line-height: 1.6; margin: 12px 0 0; padding: 20px 24px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; max-width: 76ch; }
-.jd-wrap { margin-top: 10px; }
-.jd-wrap > summary { cursor: pointer; font-size: 14.5px; color: var(--navy); font-weight: 600; width: fit-content; }
+.job-tabs { display: flex; gap: 4px; margin: 0 0 24px; border-bottom: 1px solid var(--rule); }
+.job-tabs a { padding: 9px 14px; font-size: 14.5px; font-weight: 600; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+.job-tabs a:hover { color: var(--navy); }
+.job-tabs a[aria-current="page"] { color: var(--navy); border-bottom-color: var(--navy); }
+.job-tab-count { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--rule); padding: 0 7px; border-radius: 999px; }
 .jd-md { white-space: normal; }
 .jd-md .md { max-width: none; }
 .jd-md .md h1, .jd-md .md h2, .jd-md .md h3 { font-size: 15px; margin: 18px 0 6px; }

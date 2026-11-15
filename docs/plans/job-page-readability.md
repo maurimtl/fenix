@@ -224,3 +224,14 @@ Two fresh reviewers read the spec, the plan and the code. Their findings are fol
 - data repair: the Edward Jones posting saved on 2026-11-15 before the build carried a repeated tail and stray style text; it is now the exact posting (9,894 characters). The scratch profile is removed.
 - deferred: jobs saved on 2026-11-14 with "(Excerpt.)" bodies are left as they are (all are filtered out, closed or applied). The real profile has no Markdown-body job yet; the next hunt will save the first one.
 - final: bca5cff, 9/9 tasks done. lint, tsc, check:data, check:jobs 92/92, check:hunt 115/115, check:store pass. Not pushed.
+
+## Addendum (2026-11-15, approved in chat the same day)
+
+**Why.** After the build, Mauricio opened an older job (1Password, Director of Product, AI Growth): the page is long (16 application answers) and its posting is one flat block. He asked for tabs, and for existing postings to get their formatting back.
+
+**Scope.**
+- A. **Tabs on the job page**, chosen by `?tab=` in the address so links and the back button work and no client script is needed: **Overview** (the apply or interview prompt, interviews, banners, fit notes, watch-outs, the role summary, his notes), **Application** (the answers and the CV link; shown when there are answers), **Posting** (the full posting, open; shown when one is saved). The sidebar stays on every tab. An unknown or empty tab falls back to Overview.
+- B. **Formatting for postings already saved**, for active jobs (Found, Shortlisted, CV ready, Applied, Interviewing, Offer): re-fetch from the company's board where the job's source is Ashby, Greenhouse or Lever and the posting is still up; convert plain text that has line breaks in place (typed bullets become bullets, short standalone lines become headings, no words changed); re-read LinkedIn postings that are one flat block where they are still open. A flat block whose posting is gone stays as it is.
+- Out: summaries for old jobs (he said no), and closed or filtered-out jobs.
+
+**Checks.** `pickTab` and `plain_to_md` are pure functions with literal-value tests (`pnpm check:jobs`, `pnpm check:hunt`). The tabs are checked in the browser on the 1Password job. For B, each converted body must have the same letters and digits as the body it replaces (plain-text conversion), and the count of jobs per outcome goes in Status.

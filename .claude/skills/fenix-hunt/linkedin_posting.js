@@ -23,7 +23,7 @@ const walk = (n, inBold) => { for (const c of n.childNodes) {
   else if (t === 'UL' || t === 'OL') { flush(); depth++; walk(c, inBold); flush(); depth--; if (!depth && out.length && out[out.length - 1] !== '') out.push(''); }
   else if (t === 'BR' || t === 'HR') flush();
   else if (t === 'P' || t === 'DIV') { flush(); walk(c, inBold); flush(); }
-  else if (t === 'A') { const s = cur.length; walk(c, inBold); const label = cur.slice(s).replace(/\s+/g, ' ').trim(); let href = c.href || ''; try { const u = new URL(href); if (/linkedin\.com$/.test(u.hostname) && u.searchParams.get('url')) href = u.searchParams.get('url'); } catch (e) {}
+  else if (t === 'A') { const s = cur.length; walk(c, inBold); const label = cur.slice(s).replace(/\s+/g, ' ').trim(); let href = c.href || ''; try { const u = new URL(href); if (/linkedin\.com$/.test(u.hostname) && u.searchParams.get('url')) href = u.searchParams.get('url'); } catch {}
     href = href.replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/ /g, '%20');
     if (label && /^https?:/.test(href)) cur = cur.slice(0, s) + (label.replace(/\\/g, '') === href ? href : '[' + label + '](' + href + ')'); }
   else walk(c, inBold || t === 'STRONG' || t === 'B'); } };
