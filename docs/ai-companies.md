@@ -1,16 +1,16 @@
 # Fast-growing AI companies
 
-The AI companies the hunt checks directly on their own job boards, because their roles often never reach LinkedIn (Runway's "Member of Product Staff, Agents" was only on its Ashby board). Each line: name — what it does — board (as written in `.claude/skills/fenix-hunt/watchlist.txt`) — where the name came from.
+The AI companies the hunt checks directly on their own job boards, because their roles often never reach LinkedIn (Runway's "Member of Product Staff, Agents" was only on its Ashby board). Each line: name — what it does — board (as written in `.claude/skills/fenix-hunt/watchlist-ai.txt`, where these boards also keep Senior/Staff PM titles) — where the name came from.
 
 Built 2026-11-15. Every board slug was read from the company's own careers page, or, where that page renders its board with JavaScript, confirmed by the board's postings naming the company ("confirmed by postings").
 
-**To refresh:** look at the sources below for new names, find each careers page's board link, check the slug answers (Ashby `api.ashbyhq.com/posting-api/job-board/<slug>`, Greenhouse `boards-api.greenhouse.io/v1/boards/<slug>/jobs`, Lever `api.lever.co/v0/postings/<slug>?mode=json`), watch for name collisions (below), add a line to the watchlist and here.
+**To refresh:** look at the sources below for new names, find each careers page's board link, check the slug answers (Ashby `api.ashbyhq.com/posting-api/job-board/<slug>`, Greenhouse `boards-api.greenhouse.io/v1/boards/<slug>/jobs`, Lever `api.lever.co/v0/postings/<slug>?mode=json`), watch for name collisions (below), add a line to `watchlist-ai.txt` and here.
 
 **Sources:** SOTA2 "Top 100 fastest-growing AI companies" (sota2.com/top/ai-fastest-growing, updated 2026-10-27); TechCrunch, "These AI startups are growing revenue at faster and faster rates" (2026-07-08); AI Business revenue leaderboard (aibusiness.vc, November 2026); Catalora, "Fastest to $100M in 2026" (2026-11-05). "Known" means a well-known high-growth AI company named when the list was commissioned, not taken from a ranked list. Forbes AI 50 (2026, published 2026-04-16): its roster wasn't readable in search results, so nothing here is attributed to it; check forbes.com/lists/ai50 on the next refresh.
 
 **Name collisions:** Ashby `runway` is Runway Financial (Runway the AI video company is `runway-ml`); Ashby `warp` is Warp the payroll platform (Warp the terminal is Greenhouse `warp`); Ashby `midjourney` is Midjourney, but only its medical-scanner team posts there; Ashby `sierra-jp` is Sierra's Japan board (only `sierra` is watched).
 
-## Watched (in the watchlist)
+## Watched (in watchlist-ai.txt)
 
 - Runway — AI video generation, world models — `runway-ml:ashby` — known
 - ElevenLabs — voice AI and voice agents — `elevenlabs:ashby` (confirmed by postings) — AI Business, Catalora
@@ -37,7 +37,7 @@ Built 2026-11-15. Every board slug was read from the company's own careers page,
 - Retell AI — voice agents for calls — `retell-ai:ashby` — SOTA2
 - OpenArt — AI image and video creation — `openart:ashby` — SOTA2
 - AssemblyAI — speech AI API — `assemblyai:greenhouse` — SOTA2
-- Databricks — data and AI platform — `databricks:greenhouse` (confirmed by postings) — AI Business
+- Databricks — data and AI platform — `databricks:greenhouse` (confirmed by postings; in `watchlist.txt`, director-level and up only, because it lists many senior PM roles) — AI Business
 - Scale AI — AI training data — `scaleai:greenhouse` (confirmed by postings) — AI Business
 - Higgsfield — AI video and image workspace — `higgsfieldai:ashby` — Catalora
 - Bolt (StackBlitz) — AI app builder — `stackblitz:greenhouse` — known
