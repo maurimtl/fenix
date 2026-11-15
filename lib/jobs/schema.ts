@@ -37,6 +37,10 @@ export const jobInputSchema = z
     fitScore: z.number().int().min(0).max(100).nullish(),
     whyGood: text(4000).nullish(),
     redFlags: text(4000).nullish(),
+    /** What the role owns, who it reports to and the must-haves, one point per line. */
+    jdSummary: text(1500).nullish(),
+    /** "md" when jdText is light Markdown (headings, bullets); absent for plain text. */
+    jdFormat: z.enum(["md"]).nullish(),
     easyApply: z.boolean().nullish(),
     applicants: z.number().int().min(0).nullish(),
 

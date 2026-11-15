@@ -128,6 +128,10 @@ export const jobSchema = z.looseObject({
   fitScore: z.number().int().nullish(),
   whyGood: optStr,
   redFlags: optStr,
+  /** A short summary of the role, one point per line, shown above the posting. */
+  jdSummary: optStr,
+  /** "md" when the body is light Markdown; absent when it is plain text. */
+  jdFormat: z.enum(["md"]).nullish(),
   easyApply: z.boolean().nullish(),
   applicants: z.number().int().nullish(),
   stage: z.enum(STAGES).default("FOUND"),

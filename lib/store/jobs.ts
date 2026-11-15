@@ -104,6 +104,8 @@ export function toJob({ data: d, body }: JobFile) {
     fitScore: n(d.fitScore),
     whyGood: n(d.whyGood),
     redFlags: n(d.redFlags),
+    jdSummary: n(d.jdSummary),
+    jdFormat: n(d.jdFormat),
     easyApply: n(d.easyApply),
     applicants: n(d.applicants),
     stage: d.stage,

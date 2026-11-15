@@ -7,7 +7,7 @@ import { filterBoard, inWindow, parseBoardView, sortColumn, viewHref } from "../
 import { ageLine, bestMatchOrder, freshness, FRESHNESS_RANK, mergePosted, postingAgeDays } from "../lib/jobs/freshness";
 import { jobInputSchema } from "../lib/jobs/schema";
 import { boardDate } from "../lib/jobs/posted-date";
-import { parseNotes } from "../lib/jobs/notes";
+import { parseNotes, summaryItems } from "../lib/jobs/notes";
 
 const cases: [string, Parameters<typeof classify>[0], ReturnType<typeof classify>][] = [
   ["180-220k USD posting, country_ok → filtered on comp",
@@ -269,6 +269,20 @@ const extra: [string, () => void][] = [
       { label: "Domain gap", text: "sécurité, not in his record" },
     ])],
   ["fit notes: empty text gives no items", () => assert.deepEqual(parseNotes("  \n "), [])],
+  ["role summary: eight lines show six", () =>
+    assert.deepEqual(summaryItems("a\nb\nc\nd\ne\nf\ng\nh").map((i) => i.text), ["a", "b", "c", "d", "e", "f"])],
+  ["save schema keeps the role summary and the body format", () => {
+    const saved = jobInputSchema.parse({ ...INPUT, jdSummary: "Owns: the growth roadmap\nReports to: the CPO", jdFormat: "md" });
+    assert.equal(saved.jdSummary, "Owns: the growth roadmap\nReports to: the CPO");
+    assert.equal(saved.jdFormat, "md");
+  }],
+  ["save schema: a save without a summary carries no summary key, so the stored one is kept", () => {
+    const saved = jobInputSchema.parse(INPUT);
+    assert.equal("jdSummary" in saved, false);
+    assert.equal("jdFormat" in saved, false);
+  }],
+  ["save schema rejects an unknown body format", () =>
+    assert.equal(jobInputSchema.safeParse({ ...INPUT, jdFormat: "html" }).success, false)],
   ["USD pay names its currency", () => assert.equal(formatComp({ compMin: 240000, compMax: 320000, currency: "USD", compSource: "posting" }), "$240k–$320k USD, posted")],
   ["CAD pay shows a USD conversion", () => assert.match(formatComp({ compMin: 255500, compMax: 365000, currency: "CAD", compSource: "company_site" }), /^\$256k–\$365k CAD \(≈ \$\d+k–\$\d+k USD\)/)],
 ];

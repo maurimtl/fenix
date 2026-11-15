@@ -21,3 +21,10 @@ export function parseNotes(text: string): NoteItem[] {
     return short ? { label, text: line.slice(at + 2).trim() } : { label: null, text: line };
   });
 }
+
+const SUMMARY_MAX_ITEMS = 6;
+
+/** The role summary as list items, cut to what the job page shows. */
+export function summaryItems(text: string): NoteItem[] {
+  return parseNotes(text).slice(0, SUMMARY_MAX_ITEMS);
+}
