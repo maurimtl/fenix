@@ -4,7 +4,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-import hunt_ats, hunt_core, hunt_feeds, scan
+import hunt_ats, hunt_core, hunt_feeds, post_job, scan
 from hunt_http import FetchError
 
 FIX = Path(__file__).parent / "fixtures"
@@ -234,6 +234,10 @@ check("md: text that looks like markup stays text",
       "C# and 5* hotels, snake_case, $209,040\u2014$296,140\n\n\\# not a heading\n\n\\> not a quote\n\n-5% is not a bullet")
 check("md: line breaks, scripts and styles", md("<style>x{}</style><p>Line one<br>Line two</p><script>hide()</script>"),
       "Line one\n\nLine two")
+check("md: links keep their address",
+      md('<p>Read <a href="https://example.com/culture">our culture post</a> and <a href="https://example.com">https://example.com</a>, '
+         'or <a href="#top">go up</a>.</p>'),
+      "Read [our culture post](https://example.com/culture) and https://example.com, or go up.")
 check("md: no tags, and nothing", [md("Just text"), md(""), md(None)], ["Just text", "", ""])
 check("md: cut at Fenix's limit", len(md("<p>" + "x" * 70_000 + "</p>")), 60_000)
 r = hunt_ats.parse_greenhouse({"jobs": [{"id": 1, "title": "Head of Product",
@@ -304,6 +308,43 @@ try:
         check("fetch_detail: a list-call board has nothing to fetch", "carry their description already" in str(e), True)
 finally:
     hunt_ats.fetch_json = real_fetch
+
+# --- post_job: the body sent to Fenix ---
+scanned = hunt_core.role("ashby", "6f1c2a3b-0000-4000-8000-000000000001", "acme", "Head of Product", "https://jobs.ashbyhq.com/acme/6f1c",
+                         "Remote - Canada", True, "$250K", "2026-11-12T15:04:05.000Z", "flat text", jd="## The role\n\n- Own it")
+judged = {"company": "Acme", "compMin": 250000, "compMax": 300000, "currency": "USD", "compSource": "company_site",
+          "remoteVerdict": "country_ok", "fitScore": 80, "whyGood": "Level: head of product", "jdSummary": "Owns: the roadmap"}
+check("post_job: facts from the scan, judgment from the session", post_job.build_body(dict(scanned), judged),
+      {"source": "ashby", "sourceJobId": "6f1c2a3b-0000-4000-8000-000000000001", "url": "https://jobs.ashbyhq.com/acme/6f1c",
+       "company": "Acme", "title": "Head of Product", "jdText": "## The role\n\n- Own it", "jdFormat": "md",
+       "locationText": "Remote - Canada", "postedAt": "2026-11-12T15:04:05.000Z", "postedAtSource": "board",
+       "compMin": 250000, "compMax": 300000, "currency": "USD", "compSource": "company_site", "remoteVerdict": "country_ok",
+       "fitScore": 80, "whyGood": "Level: head of product", "jdSummary": "Owns: the roadmap"})
+
+
+def refusal(role, fields=judged, detail=None):
+    try:
+        post_job.build_body(role, fields, detail) if detail else post_job.build_body(role, fields)
+        return "saved"
+    except post_job.Refused as e:
+        return str(e)
+
+
+check("post_job: a feed role is refused", refusal(hunt_core.role("himalayas", "9", "x", "VP Product", "u", jd="text")).startswith("himalayas is a feed, not"), True)
+check("post_job: no description is refused", "whole text or nothing" in refusal(hunt_core.role("ashby", "1", "x", "VP Product", "u")), True)
+check("post_job: an excerpt is refused", "is an excerpt" in refusal(hunt_core.role("ashby", "1", "x", "VP Product", "u", jd="(Excerpt.) Some of it")), True)
+check("post_job: missing judgment fields are named", refusal(dict(scanned), {"company": "Acme"}), "--json is missing compSource, remoteVerdict")
+late = hunt_core.role("workday", "JR1", "nvidia", "Director, Product", "u")
+late["board"] = ["workday", "nvidia", "wd5/Site"]
+body = post_job.build_body(late, judged, lambda r: r.update(jd="Fetched posting", jdFormat="md"))
+check("post_job: a role past the detail cap has its description fetched", (body["jdText"], body["jdFormat"]), ("Fetched posting", "md"))
+amz = hunt_core.role("amazon", "3112233", "Amazon", "Principal PM", "https://www.amazon.jobs/en/jobs/3112233", jd="## Description")
+check("post_job: Amazon is saved under the company's site", post_job.build_body(amz, judged)["source"], "company_site")
+try:
+    post_job.find_role("ashby:nope", ["no-such-file.json"])
+    check("post_job: a key the file does not have", "found", "Refused")
+except post_job.Refused as e:
+    check("post_job: a key the file does not have", ("ashby:nope is not in no-such-file.json" in str(e), "boards.py" in str(e)), (True, True))
 
 failed = [c for c in checks if not c[1]]
 for name, _, got, want in failed:

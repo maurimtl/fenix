@@ -43,12 +43,13 @@ class _Markdown(HTMLParser):
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.out, self.cur, self.prefix = [], [], ""
+        self.out, self.cur, self.prefix, self.links = [], [], "", []
         self.depth = self.bold = self.skip = 0
         self.bold_text = self.plain_text = False
 
     def flush(self):
         line = re.sub(r"\s+", " ", "".join(self.cur)).strip()
+        self.links = []
         if not line:
             # An empty block (a <p> opening inside an <li>) keeps the pending bullet or heading mark.
             self.cur = []
@@ -86,6 +87,8 @@ class _Markdown(HTMLParser):
             self.flush()
         elif tag in ("strong", "b"):
             self.bold += 1
+        elif tag == "a":
+            self.links.append((len(self.cur), dict(attrs).get("href") or ""))
 
     def handle_endtag(self, tag):
         if tag in ("script", "style"):
@@ -102,6 +105,12 @@ class _Markdown(HTMLParser):
             self.flush()
         elif tag in ("strong", "b"):
             self.bold = max(self.bold - 1, 0)
+        elif tag == "a" and self.links:
+            start, href = self.links.pop()
+            label = re.sub(r"\s+", " ", "".join(self.cur[start:])).strip()
+            # A block that closed inside the link has already flushed its text; then there is nothing to wrap.
+            if label and re.match(r"https?://", href) and start <= len(self.cur):
+                self.cur[start:] = [href if label == href else f"[{label}]({href})"]
 
     def handle_data(self, data):
         if self.skip:
