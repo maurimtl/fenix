@@ -58,3 +58,7 @@ Read on two live postings on 2026-11-15 (one with headings and lists, one mostly
 - a "…more" `button` sits at the end, and "Benefits found in job post" can follow inside the same container.
 
 `.claude/skills/fenix-hunt/linkedin_posting.js` turns that into headings, bullets and paragraphs. On both postings its output had the same letters as the page's own text for the section. If LinkedIn changes these elements the script will return a posting with no headings; fall back to the plain-text slice in the hunt skill and save without `jdFormat`.
+
+## The "More jobs" block at the bottom of a posting
+
+Seen 2026-11-15 on a Canada listing (Autodesk, Senior Director, Product Management, AEC Data). After scrolling to the bottom, the posting page shows a "More jobs" heading inside `main` with five cards and a "See more jobs like this" link. Each card is an `a` whose address is `/jobs/search-results/` with `origin=JobSearchOrigin_JOB_DETAILS_SIMILAR_JOBS_CARD` and the similar job's id in `currentJobId`; its text has the title, company, location, pay when LinkedIn shows it, and "Posted N ago". The five were all remote in Canada, like the posting, and all five were roles the hunt had already found through its searches, so expect heavy overlap. `linkedin_similar.js` in the hunt skill reads the block. The block does not load until the page is scrolled down.

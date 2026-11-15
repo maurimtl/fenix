@@ -28,7 +28,7 @@ One Fenix profile per run, `<p>` below (a folder in `data/`). If there's only on
 
 ## Two kinds of run
 
-- **Full hunt** ("run a hunt"): everything below, in this order: script sources, LinkedIn jobs, hiring posts, Lenny's Jobs, remote-job boards, startup boards, Google and Meta, closed postings, CV drafting, report.
+- **Full hunt** ("run a hunt"): everything below, in this order: script sources, LinkedIn jobs, similar jobs, hiring posts, Lenny's Jobs, remote-job boards, startup boards, Google and Meta, closed postings, CV drafting, report.
 - **Fresh pass** ("run a fresh pass"): only the steps that find new postings fast: script sources, the LinkedIn past-24-hours pass, hiring posts. Meant for the days between full hunts. Same rules, smaller limits.
 
 ## Bounds per run
@@ -41,6 +41,7 @@ One Fenix profile per run, `<p>` below (a folder in `data/`). If there's only on
 | LinkedIn saved queries as written | **every** query in `settings.queries`, ≤ 4 result pages each (100 cards) | skipped |
 | Postings opened in the browser (all sources) | ≤ 100 | ≤ 30 |
 | Company-site visits | ≤ 30 | ≤ 10 |
+| Similar jobs on LinkedIn | ≤ 10 source postings, the "More jobs" block of each; the pages opened count toward the row above | skipped |
 | Hiring-post searches | 4 on LinkedIn, 4 on X, about 30 posts read in each | the same |
 | Lenny's Jobs, each remote-job board, startup.jobs, hiring.cafe | 1 pass each | skipped |
 | Google and Meta careers | 1 page each | skipped |
@@ -83,6 +84,19 @@ Applying early matters (the person's scale is in `hunt-profile.md`), so run the 
 3. **The saved queries as written** (past week or past month), up to 4 pages each.
 
 From all three, build one candidate list (id, title, company, location, pay, age), drop the known ids, and open postings **youngest first**: hours before days, days before weeks, a card with no age last. When the opened-postings bound runs out, the unread candidates are the oldest ones; say how many were left and how old.
+
+### Similar jobs (full hunt, after the searches)
+
+At the bottom of every LinkedIn posting is a "More jobs" block: about five roles LinkedIn thinks are like this one. They are its own matches to a role the person chose, so they reach roles the keyword searches miss. On a Canada listing the five were all remote in Canada (2026-11-15), so the block follows the posting's country.
+
+1. **Source postings:** the person's jobs whose `source` is `linkedin` and whose stage is Applied, Shortlisted, CV ready or Interviewing, entered in the last 14 days, newest first, at most 10. (`data/<p>/jobs/*.md`: `source`, `sourceJobId`, `stage`, `stageHistory`.) Prefer postings for different companies and titles; two postings for the same title return the same block.
+2. **Read the block:** open the posting and run the contents of `.claude/skills/fenix-hunt/linkedin_similar.js` in one `javascript_tool` call. It scrolls to the bottom and answers one line per similar job: `<id> | <title> | <company> | <location> | <pay, if shown> | <age>`. Run it **before** `linkedin_posting.js` if you also want the posting; that script replaces the page.
+3. **Judge the cards** like search results: drop ids already stored (`GET /api/p/<p>/jobs?source=linkedin&ids=…`) and companies already in the pipeline with the same title, skip on-site and off-target titles from the card, and add the rest to the candidate list, to be opened youngest first with the others.
+4. A posting that is closed or shows `NO_SIMILAR_JOBS` is skipped; go to the next source posting.
+
+The block's "See more jobs like this" link opens a search-results page for the posting's title. It is not part of this step: the saved queries already cover title searches. Read only: never click a card's Save or Apply.
+
+In the report, give the similar-jobs count like any source (new / already known / saved) and say which source posting led to each new job (`foundVia` stays for hiring posts only).
 
 ## Script sources (no browser; first step of every run)
 
@@ -244,7 +258,7 @@ A strong match is a job that came back `SHORTLISTED` **and** has fit ≥ `settin
 ## End-of-run report
 
 Short summary to the person:
-- counts per source (LinkedIn jobs / hiring posts on LinkedIn / hiring posts on X / each script source that kept anything / Lenny's Jobs / remote boards / startup.jobs / hiring.cafe / Google / Meta): new / already known (skipped) / shortlisted / found-needs-check / filtered out / CV ready
+- counts per source (LinkedIn jobs / similar jobs on LinkedIn / hiring posts on LinkedIn / hiring posts on X / each script source that kept anything / Lenny's Jobs / remote boards / startup.jobs / hiring.cafe / Google / Meta): new / already known (skipped) / shortlisted / found-needs-check / filtered out / CV ready
 - script sources that printed `FAILED`, `0 read` or a cap, and how many roles were hidden as seen or merged
 - for each new job, which source found it first (a feed, a board, a LinkedIn search, a post)
 - dream-company roles, each with its fit, including the middling ones
