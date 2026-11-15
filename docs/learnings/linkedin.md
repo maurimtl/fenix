@@ -47,3 +47,14 @@ Scrolling the results page did not load more than the first 6 to 12 posts, and t
 ## Page scripts can't carry state between result pages
 
 On the job-search pages (2026-11-13), `eval` is blocked by the content security policy, and `sessionStorage` and `window.name` both come back empty after each navigation, so a script can't keep a list of ids already seen from one page to the next. Paste the whole extraction script into every page and dedupe afterwards. Writing the rows into a `<pre>` and reading it with `get_page_text` avoids the 1,000-character limit on script output. LinkedIn did not add the saved salary filter (`f_SAL`) to any US search on this run.
+
+## What a job posting's "About the job" is made of
+
+Read on two live postings on 2026-11-15 (one with headings and lists, one mostly plain). The section is an `h2` with the exact text "About the job" followed by one `p` holding a `span`. Inside it:
+- section titles are `strong` elements on their own line, with the line breaks inside the `strong`;
+- paragraphs are separated by `br` elements, not by `p`;
+- lists are real `ul` / `li` elements;
+- links are `a` elements whose address is a LinkedIn redirect with the real address in its `url` parameter;
+- a "…more" `button` sits at the end, and "Benefits found in job post" can follow inside the same container.
+
+`.claude/skills/fenix-hunt/linkedin_posting.js` turns that into headings, bullets and paragraphs. On both postings its output had the same letters as the page's own text for the section. If LinkedIn changes these elements the script will return a posting with no headings; fall back to the plain-text slice in the hunt skill and save without `jdFormat`.
