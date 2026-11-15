@@ -125,4 +125,4 @@ None.
 - done: task 4: SKILL.md updated; targetTitles has 4 entries (set-profile), check:data ok; hunt-profile memory updated, 2dcbbd4
 - review: 7 findings, 4 fixed (US-only "anywhere" no longer flags world; no slug in both watchlists, checked; test stub restored in finally; dated move notes removed), 3 left by decision (loose "lead … product manager" titles are rare and judged by the session; name lookups keep IC titles as the spec says; merged roles keep the board's text in practice). check:hunt 152/152, runway-ml still flagged world. 99bdf5f
 - final: 99bdf5f, 5/5 tasks done (0–4)
-- follow-up (not started): hiring-post searches on LinkedIn and X pair "hiring" with director-level titles only, so senior IC roles at AI companies never surface there either.
+- follow-up done: hiring-post searches add a fifth query per site for senior PM roles at AI companies (SKILL.md).
