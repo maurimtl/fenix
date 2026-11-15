@@ -1,6 +1,6 @@
 """The hunt scanner: every job source a script can read, as one list of new roles, newest first.
 
-  python3 scan.py --profile <person>          full scan: company boards (watchlist.txt + the person's extras and
+  python3 scan.py --profile <person>          full scan: company boards (watchlist.txt, watchlist-ai.txt, the person's extras and
                                               dream companies) and feeds (feeds.txt); hides roles already marked seen
   python3 scan.py <slug>[:board[:extra]] ...  look up companies only; nothing hidden; writes boards.json
   python3 scan.py --profile <person> --mark-seen <key> ...   record judged roles (keys are printed per role)
@@ -80,9 +80,11 @@ def role_line(r):
             f" | home={r['homeMention']}{' | world' if r.get('openWorld') else ''} | {(r['comp'] or '')[:40]}{flags}")
 
 
-def scan_boards(entries, dream, ctx):
-    """entries and dream are 'slug[:board[:extra]]'. Returns (roles, {name: stats})."""
+def scan_boards(entries, dream, ctx, ic=()):
+    """entries and dream are 'slug[:board[:extra]]'; ic is the slugs that also keep senior IC titles (dream ones always do).
+    Returns (roles, {name: stats})."""
     wide = {e.split(":")[0] for e in dream}
+    ic = set(ic) | wide
     todo = {}  # one entry per slug; the first one listed wins
     for e in entries + dream:
         todo.setdefault(e.split(":")[0], e)
@@ -90,7 +92,7 @@ def scan_boards(entries, dream, ctx):
 
     def one(entry):
         slug, board, extra = (entry.split(":", 2) + ["", ""])[:3]
-        res = scan_company(slug, board or None, extra, ctx, lambda t: keep_title(t, slug in wide, board=True))
+        res = scan_company(slug, board or None, extra, ctx, lambda t: keep_title(t, slug in wide, board=slug in ic))
         for r in res["roles"]:
             r["dream"] = slug in wide
             r["origin"] = slug
@@ -192,14 +194,15 @@ def main(argv=None):
     roles, stats = [], {}
     if lookup:
         wanted = {e.split(":")[0] for e in opts["entries"]}
-        roles, stats = scan_boards(opts["entries"], [d for d in dream if d.split(":")[0] in wanted], ctx)
+        roles, stats = scan_boards(opts["entries"], [d for d in dream if d.split(":")[0] in wanted], ctx, ic=wanted)
     else:
         # Feeds pause between requests (rate limits), so they run beside the company boards.
         with ThreadPoolExecutor(max_workers=1) as side:
             feeds = side.submit(scan_feeds, ctx) if opts["only"] != "boards" else None
             if opts["only"] != "feeds":
                 extra = csv_env("FENIX_WATCHLIST_EXTRA") or hunt.get("watchlistExtra") or []
-                roles, stats = scan_boards(lines("watchlist.txt") + extra, dream, ctx)
+                ai = lines("watchlist-ai.txt")
+                roles, stats = scan_boards(lines("watchlist.txt") + ai + extra, dream, ctx, ic={e.split(":")[0] for e in ai})
             if feeds:
                 more, feed_stats = feeds.result()
                 roles += more

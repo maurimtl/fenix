@@ -222,6 +222,14 @@ world["origin"] = "runway-ml"
 w = scan.finish([world], {"runway-ml": dict(status="ok", board="ashby", read=1, kept=0)}, set(), False, ctx)[0]
 check("finish: openWorld set, homeMention not", (w["openWorld"], w["homeMention"]), (True, False))
 check("role line marks world", " | world | " in scan.role_line(w), True)
+# Senior IC titles only on ic boards and dream companies; the filter scan_boards hands each board decides.
+filters = {}
+real_scan_company = scan.scan_company
+scan.scan_company = lambda slug, board, extra, ctx, keep: filters.setdefault(slug, keep) and dict(status="ok", board=board, read=0, roles=[])
+scan.scan_boards(["stripe:greenhouse", "runway-ml:ashby"], ["openai:ashby"], ctx, ic={"runway-ml"})
+scan.scan_company = real_scan_company
+check("scan_boards: IC titles by board", {s: f("Staff Product Manager") for s, f in filters.items()},
+      {"stripe": False, "runway-ml": True, "openai": True})
 check("status lines", [scan.status_line(n, s) for n, s in [
     ("a", dict(status="notfound")), ("b", dict(status="failed", reason="500 Server Error")),
     ("c", dict(status="ok", board="lever", read=0, kept=0)),
