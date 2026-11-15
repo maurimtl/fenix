@@ -199,3 +199,28 @@ Two fresh reviewers read the spec, the plan and the code. Their findings are fol
 - **Task quality — fixed.** The scanner work is split in two; the LinkedIn script comes before the skill text that describes it; one-line fit notes are never split; the section heading matches the spec; criteria 4, 6, 7 and 10 each have a named check.
 
 ## Status
+
+- build started 2026-11-15 from e9aabd8, in session. Premises: checked against the code by the plan review the same day; no change since.
+- in-progress: task 1
+- done: task 1: check:jobs 85/85 (7 new fit-notes cases), tsc clean, 93d21a4
+- in-progress: task 2
+- done: task 2: check:jobs 89/89 (4 new), check:data ok, tsc clean; by hand in a scratch profile a re-save without jdSummary kept the stored one and the page drew the summary as a labelled list, 02da8ae
+- in-progress: task 3
+- done: task 3: tsc and lint clean; served HTML checked: a Markdown body renders h2 and ul inside a closed details, a plain-text body (Cohere) still renders in pre.jd, f6ce663
+- in-progress: task 4
+- done: task 4: check:hunt 89/89 (19 new). Amendments: role() takes the Markdown as a separate jd argument instead of deriving both forms from one description, because Lever and Amazon build text from several fields; bullets typed as text become bullets and numbered lines are left alone (the plan said to escape both); Ashby's listing does carry descriptionHtml, so Ashby bodies are Markdown, 5171267
+- in-progress: task 5
+- done: task 5: check:hunt 96/96 (7 new). Kept roles from a detail board now carry the board, slug and extra needed to fetch one description later, and Workday roles past the cap keep their path; html_to_md drops a tag the source cut off, 640e39c
+- in-progress: task 6
+- done: task 6: check:hunt 105/105 (9 new, incl. links). Real run: 1Password's Senior Director, Product Security saved from boards.json into a scratch profile; the stored body matches the board's own description letter for letter (10,827 letters), carries jdFormat md, and a re-save without jdSummary kept the summary. Amendment: html_to_md keeps link addresses, which the first comparison showed were being dropped, b8a2267
+- in-progress: task 7
+- done: task 7: run on two live postings (Cohere: 8 headings, 34 bullets; Aria InsurTech: 8 headings, 37 bullets); in both the output's letters equal the page's own text for the section. Amendment: the script lives in its own file, .claude/skills/fenix-hunt/linkedin_posting.js (added to the file map), so the session pastes it instead of retyping it, d81f13d
+- in-progress: task 8
+- done: task 8: both skill files read through; 'excerpt' appears in the hunt skill only in the new hard rule; every boards.py call in the skill now sets OUT so no boards.json lands in the repo root, a8660ea
+- in-progress: task 9
+- done: task 9: Edward Jones job converted through the save route (stage, CV link and answers kept; 3 fit lines, 3 watch-out lines, 5 summary lines); architecture doc updated; lint, tsc, check:data, check:jobs 89/89, check:hunt 105/105 pass; no job saved since the build started has an excerpt body, e455edc
+- review: 10 findings, 10 fixed, bca5cff. (1) a plain-text re-save left a stale jdFormat md; (2) post_job.py saved the board's slug as the company when --json had none; (3) a Lever posting with null lists crashed the parser; (4) Ashby HTML that converted to nothing was still marked Markdown; (5) the posting's own *, `, [ ], word-edge _ and leading + were not escaped, nor parentheses in link addresses; (6) a failed Workday detail request lost the role's path; (7) every listed role was converted before the title filter, now only kept roles are; (8) post_job.py blamed a seen role when the scan file was simply missing; (9) older multi-line prose notes would have been split into bullets; (10) the LinkedIn script threw on a page with no posting.
+- browser pass (Playwright, port 3007): Edward Jones shows 3 + 3 labelled fit notes, a 5-line summary and a closed plain-text posting; Autodesk AEC Data (old format) shows its two paragraphs and a closed flat posting; a Markdown body (1Password, saved into a scratch profile, since removed) showed 9 headings at 15px, 23 bullets and 4 links inside the closed section. No page errors, no sideways scroll at desktop or phone width.
+- data repair: the Edward Jones posting saved on 2026-11-15 before the build carried a repeated tail and stray style text; it is now the exact posting (9,894 characters). The scratch profile is removed.
+- deferred: jobs saved on 2026-11-14 with "(Excerpt.)" bodies are left as they are (all are filtered out, closed or applied). The real profile has no Markdown-body job yet; the next hunt will save the first one.
+- final: bca5cff, 9/9 tasks done. lint, tsc, check:data, check:jobs 92/92, check:hunt 115/115, check:store pass. Not pushed.
