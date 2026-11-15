@@ -7,6 +7,7 @@ import { filterBoard, inWindow, parseBoardView, sortColumn, viewHref } from "../
 import { ageLine, bestMatchOrder, freshness, FRESHNESS_RANK, mergePosted, postingAgeDays } from "../lib/jobs/freshness";
 import { jobInputSchema } from "../lib/jobs/schema";
 import { boardDate } from "../lib/jobs/posted-date";
+import { parseNotes } from "../lib/jobs/notes";
 
 const cases: [string, Parameters<typeof classify>[0], ReturnType<typeof classify>][] = [
   ["180-220k USD posting, country_ok → filtered on comp",
@@ -243,6 +244,31 @@ const extra: [string, () => void][] = [
     assert.equal(noReplyDays({ stage: "APPLIED", stageDateKnown: false, stageEnteredAt: new Date("2026-09-12T12:00:00Z") }, new Date("2026-11-11T12:00:00Z")), null)],
   ["no reply: 90 days in Interviewing is not tagged", () =>
     assert.equal(noReplyDays({ stage: "INTERVIEWING", stageDateKnown: true, stageEnteredAt: new Date("2026-08-13T12:00:00Z") }, new Date("2026-11-11T12:00:00Z")), null)],
+  ["fit notes: one line stays one unlabelled item, even with an early colon", () =>
+    assert.deepEqual(parseNotes("Pay: reaches his floor. Location: remote in Canada."), [{ label: null, text: "Pay: reaches his floor. Location: remote in Canada." }])],
+  ["fit notes: two lines give two labelled items", () =>
+    assert.deepEqual(parseNotes("Pay: reaches his floor\nLocation: remote in Canada"), [
+      { label: "Pay", text: "reaches his floor" },
+      { label: "Location", text: "remote in Canada" },
+    ])],
+  ["fit notes: a line that starts with a link has no label", () =>
+    assert.deepEqual(parseNotes("Level: director\nhttps://example.com shows the band"), [
+      { label: "Level", text: "director" },
+      { label: null, text: "https://example.com shows the band" },
+    ])],
+  ["fit notes: a colon after a long lead-in gives no label", () =>
+    assert.deepEqual(parseNotes("Level: director\nThe posting asks for one thing above all others: deep domain experience")[1], {
+      label: null,
+      text: "The posting asks for one thing above all others: deep domain experience",
+    })],
+  ["fit notes: a four-word lead-in gives no label", () =>
+    assert.equal(parseNotes("Level: director\nWhat he would own: the roadmap")[1].label, null)],
+  ["fit notes: Windows line endings, blank lines and bullet marks are cleaned", () =>
+    assert.deepEqual(parseNotes("- Pay: under his floor\r\n   \r\n• Domain gap: sécurité, not in his record\r\n"), [
+      { label: "Pay", text: "under his floor" },
+      { label: "Domain gap", text: "sécurité, not in his record" },
+    ])],
+  ["fit notes: empty text gives no items", () => assert.deepEqual(parseNotes("  \n "), [])],
   ["USD pay names its currency", () => assert.equal(formatComp({ compMin: 240000, compMax: 320000, currency: "USD", compSource: "posting" }), "$240k–$320k USD, posted")],
   ["CAD pay shows a USD conversion", () => assert.match(formatComp({ compMin: 255500, compMax: 365000, currency: "CAD", compSource: "company_site" }), /^\$256k–\$365k CAD \(≈ \$\d+k–\$\d+k USD\)/)],
 ];

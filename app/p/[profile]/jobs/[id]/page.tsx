@@ -6,6 +6,7 @@ import { prompts } from "@/lib/start/prompts";
 import { promptWho } from "@/lib/start/progress";
 import { interviewsForJob } from "@/lib/store/interviews";
 import { CompGauge } from "@/components/comp-gauge";
+import { FitNotes } from "@/components/fit-notes";
 import { JobStageSelect } from "@/components/job-stage-select";
 import { getJob } from "@/lib/jobs/repo";
 import { ageLine, freshness } from "@/lib/jobs/freshness";
@@ -104,13 +105,13 @@ export default async function JobDetail({ params }: { params: Promise<{ profile:
                 <h2>
                   Why it fits{job.fitScore != null && <span className="fit-badge">{job.fitScore}</span>}
                 </h2>
-                <p className="prose">{job.whyGood}</p>
+                <FitNotes text={job.whyGood} />
               </section>
             )}
             {job.redFlags && (
               <section className="block">
                 <h2>Watch out for</h2>
-                <p className="prose">{job.redFlags}</p>
+                <FitNotes text={job.redFlags} />
               </section>
             )}
             {job.notes && (
