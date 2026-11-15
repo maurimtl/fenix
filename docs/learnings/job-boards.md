@@ -98,3 +98,7 @@ Seen 2026-11-15. The Apply link on `careers.edwardjones.com` opens `sjobs.brassr
 3. Profile: résumé, legal name, street address, phone as `###-###-####`, how to receive authentication codes, optional work and education history.
 
 The résumé's file input is inside the same-origin `profileBuilder` iframe, so `file_upload` cannot reach it. The iCIMS trick (a one-file server on `127.0.0.1`, then `fetch` inside the frame) did not work: the request never completed, most likely held by Chrome's local-network permission prompt. Ask the person to click Browse and pick the PDF, before any field is typed, because the upload refills the profile fields.
+
+## Ashby's Location field doesn't find Montreal
+
+On Runway's Ashby form (2026-11-15) the Location autocomplete answered "No results" to "Montreal", "Montr" and "Montréal", though its geo lookups were sent. "Canada" is listed, and that's what Mauricio picked. On Ashby forms, type "Canada" first.
