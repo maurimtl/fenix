@@ -85,3 +85,7 @@ Seen 2026-11-14. LinkedIn's Apply link lands on `jobs.autodesk.com/careers/job/<
 ## Nubank's board is on Ashby
 
 `boards.greenhouse.io/nubank` answers with no openings; the live board is `jobs.ashbyhq.com/nubank` (2026-11-14). Product manager roles are mostly not listed there; recruiters source for them directly.
+
+## We Work Remotely timed out once
+
+On 2026-11-14 the script scan printed `wwr: FAILED no answer timeout`; every other feed answered. If it fails again on the next run, check whether the feed address changed.
