@@ -89,3 +89,12 @@ Seen 2026-11-14. LinkedIn's Apply link lands on `jobs.autodesk.com/careers/job/<
 ## We Work Remotely timed out once
 
 On 2026-11-14 the script scan printed `wwr: FAILED no answer timeout`; every other feed answered. If it fails again on the next run, check whether the feed address changed.
+
+## Edward Jones (BrassRing): consents first, and the résumé upload is in a frame
+
+Seen 2026-11-15. The Apply link on `careers.edwardjones.com` opens `sjobs.brassring.com` in a new tab and needs an account (the person's step). The application is a wizard, one page at a time, about 15 minutes:
+1. "Are you currently employed with Edward Jones?"
+2. Four required "I agree" buttons, all the person's: electronic communications, texting and automated calls, a request not to use AI "to augment your performance" during recruitment, and the privacy notice. Tell the person about the AI one before filling anything else.
+3. Profile: résumé, legal name, street address, phone as `###-###-####`, how to receive authentication codes, optional work and education history.
+
+The résumé's file input is inside the same-origin `profileBuilder` iframe, so `file_upload` cannot reach it. The iCIMS trick (a one-file server on `127.0.0.1`, then `fetch` inside the frame) did not work: the request never completed, most likely held by Chrome's local-network permission prompt. Ask the person to click Browse and pick the PDF, before any field is typed, because the upload refills the profile fields.
