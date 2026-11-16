@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-data-on-stop.sh"
+            "command": "_root=\"${CLAUDE_PROJECT_DIR:-.}\"; [ -f \"$_root/.claude/hooks/check-data-on-stop.sh\" ] || _root=\"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\"; export CLAUDE_PROJECT_DIR=\"$_root\"; \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-data-on-stop.sh"
           }
         ]
       }
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh"
+            "command": "_root=\"${CLAUDE_PROJECT_DIR:-.}\"; [ -f \"$_root/.claude/hooks/check-data-on-stop.sh\" ] || _root=\"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\"; export CLAUDE_PROJECT_DIR=\"$_root\"; \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh"
           }
         ]
       }
